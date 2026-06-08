@@ -9,7 +9,7 @@ import ScrollToTop from "./components/ui/ScrollToTop"; // Dodany import
 async function getHeroSlidesFromDrupal() {
   try {
     const res = await fetch(
-      "http://atutnet.ddev.site/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile&sort=field_kolejnosc",
+      `${process.env.DRUPAL_BASE_URL}/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile&sort=field_kolejnosc`,
       { next: { revalidate: 10 } },
     );
 
@@ -30,7 +30,7 @@ async function getHeroSlidesFromDrupal() {
           (inc) => inc.id === relationshipData.data.id,
         );
         return imageNode
-          ? `http://atutnet.ddev.site${imageNode.attributes.uri.url}`
+          ? `${process.env.DRUPAL_BASE_URL}${imageNode.attributes.uri.url}`
           : null;
       };
 
