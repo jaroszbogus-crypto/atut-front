@@ -1,8 +1,14 @@
 import type { HeroSlide } from "./types";
 import Header from "./components/layout/Header";
 import HeroSlider from "./components/home/HeroSlider";
-import ServicesGrid from "./components/home/ServicesGrid"; //
-import ScrollToTop from "./components/ui/ScrollToTop"; // Dodany import
+import ServicesGrid from "./components/home/ServicesGrid";
+import FeatureCards from "./components/home/FeatureCards";
+import WhyChooseUs from "./components/home/WhyChooseUs";
+import TechnicalTabs from "./components/home/TechnicalTabs";
+import LatestNews from "./components/home/LatestNews";
+import PartnerLogos from "./components/home/PartnerLogos";
+import Footer from "./components/layout/Footer";
+import ScrollToTop from "./components/ui/ScrollToTop";
 
 // =========================================================================
 // 1. ASYNCHRONICZNE POBIERANIE DANYCH Z DRUPALA (JSON:API)
@@ -24,11 +30,11 @@ async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
     const json = await res.json();
     if (!json.data || json.data.length === 0) return null;
 
-    const mappedSlides = json.data.map((item) => {
-      const getImageUrl = (relationshipData) => {
+    const mappedSlides = json.data.map((item: any) => {
+      const getImageUrl = (relationshipData: any) => {
         if (!relationshipData || !relationshipData.data) return null;
         const imageNode = json.included?.find(
-          (inc) => inc.id === relationshipData.data.id,
+          (inc: any) => inc.id === relationshipData.data.id,
         );
         return imageNode
           ? `${process.env.DRUPAL_BASE_URL}${imageNode.attributes.uri.url}`
@@ -44,7 +50,7 @@ async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
     });
 
     return mappedSlides;
-  } catch (error) {
+  } catch (error: any) {
     console.error("[SYSTEM] Błąd połączenia z API Drupala:", error.message);
     return null;
   }
@@ -61,12 +67,14 @@ export default async function HomePage() {
       <main className="relative min-h-screen bg-gray-950 font-sans text-white">
         <Header />
         <HeroSlider drupalSlides={drupalSlides} />
-
-        {/* 💡 TUTAJ WSTAWIAMY NOWĄ SEKCJĘ ZAMIAST TYMCZASOWEGO NAPISU */}
+        <FeatureCards drupalData={null} />
         <ServicesGrid />
+        <WhyChooseUs drupalData={null} />
+        <TechnicalTabs drupalData={null} />
+        <PartnerLogos logos={null} />
+        <LatestNews drupalPosts={null} />
       </main>
-
-      {/* ScrollToTop musi być poza main, aby fixed działał względem viewportu */}
+      <Footer />
       <ScrollToTop />
     </>
   );
