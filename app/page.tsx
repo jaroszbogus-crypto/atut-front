@@ -1,3 +1,4 @@
+import type { HeroSlide } from "./types";
 import Header from "./components/layout/Header";
 import HeroSlider from "./components/home/HeroSlider";
 import ServicesGrid from "./components/home/ServicesGrid"; //
@@ -6,7 +7,7 @@ import ScrollToTop from "./components/ui/ScrollToTop"; // Dodany import
 // =========================================================================
 // 1. ASYNCHRONICZNE POBIERANIE DANYCH Z DRUPALA (JSON:API)
 // =========================================================================
-async function getHeroSlidesFromDrupal() {
+async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
   try {
     const res = await fetch(
       `${process.env.DRUPAL_BASE_URL}/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile&sort=field_kolejnosc`,

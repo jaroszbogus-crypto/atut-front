@@ -1,12 +1,17 @@
 // components/home/HeroSlider.js
 "use client";
+import type { HeroSlide } from "../../types";
 import React, { useState, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-fade";
 
-export default function HeroSlider({ drupalSlides }) {
+interface HeroSliderProps {
+  drupalSlides: HeroSlide[] | null;
+}
+
+export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
   const [swiperInstance, setSwiperInstance] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const progressLine = useRef(null);

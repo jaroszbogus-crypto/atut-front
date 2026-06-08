@@ -1,8 +1,14 @@
 "use client";
+import type { Language, EuProject } from "../../types";
 import React, { useState, useEffect } from "react";
 import FlagIcon from "../ui/FlagIcon"; // Importujemy nasz nowy, mały klocek!
 
-export default function Header({ drupalLanguages, drupalEuProjects }) {
+interface HeaderProps {
+  drupalLanguages?: Language[];
+  drupalEuProjects?: EuProject[];
+}
+
+export default function Header({ drupalLanguages, drupalEuProjects }: HeaderProps) {
   // 💡 ZMIANA 1: Rozbudowana tablica 6 języków (zgodnie z Twoją listą)
   const languages = drupalLanguages || [
     { code: "PL", label: "Polski", url: "#lang-pl", active: true },
