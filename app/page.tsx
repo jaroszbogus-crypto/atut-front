@@ -16,7 +16,7 @@ import ScrollToTop from "./components/ui/ScrollToTop";
 async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
   try {
     const res = await fetch(
-      `${process.env.DRUPAL_BASE_URL}/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile&sort=field_kolejnosc`,
+     `${process.env.DRUPAL_BASE_URL}/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile&sort=field_waga`,
       { next: { revalidate: 10 } },
     );
 
