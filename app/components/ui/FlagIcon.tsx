@@ -1,6 +1,10 @@
 import React from "react";
 
-export default function FlagIcon({ code }) {
+interface FlagIconProps {
+  code: string;
+}
+
+export default function FlagIcon({ code }: FlagIconProps) {
   const icons = {
     PL: (
       <svg
@@ -72,5 +76,5 @@ export default function FlagIcon({ code }) {
   };
 
   // Zwraca odpowiednią flagę, a jeśli nie ma w słowniku - domyślnie oddaje PL
-  return icons[code] || icons.PL;
+ return icons[code as keyof typeof icons] || icons.PL;
 }
