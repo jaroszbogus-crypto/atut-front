@@ -14,19 +14,23 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "ATUT - Systemy IoT",
-  description: "Zaawansowane systemy automatyki przemysłowej, modułowa prefabrykacja dla Przemysłu 4.0.",
+  description:
+    "Zaawansowane systemy automatyki przemysłowej, modułowa prefabrykacja dla Przemysłu 4.0.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html
       lang="pl"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-gray-900">
-        
+      {/* 💡 NAPRAWA: 
+        1. Usunięto 'flex flex-col' z body - to psuło pozycjonowanie 'fixed'.
+        2. Dodano 'relative' aby body było punktem odniesienia.
+      */}
+      <body className="h-full bg-gray-950 text-white relative">
         {children}
-        
+
         {/* 🔥 Bezpieczny, oficjalny strażnik interfejsu Next.js (Rozwiązuje błąd konsoli) */}
         <Script id="watermark-cleaner" strategy="afterInteractive">
           {`
@@ -63,7 +67,6 @@ export default function RootLayout({ children }) {
             })();
           `}
         </Script>
-
       </body>
     </html>
   );

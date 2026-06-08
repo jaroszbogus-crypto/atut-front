@@ -1,23 +1,72 @@
-import HeroSection from "./components/HeroSection";
-import FeatureCards from "./components/FeatureCards";
-import ServicesGrid from "./components/ServicesGrid";
-import WhyChooseUs from "./components/WhyChooseUs";
-import TechnicalTabs from "./components/TechnicalTabs";
-import PartnerLogos from "./components/PartnerLogos";
-import LatestNews from "./components/LatestNews";
-import Footer from "./components/Footer";
+import Header from "./components/layout/Header";
+import HeroSlider from "./components/home/HeroSlider";
+import ServicesGrid from "./components/home/ServicesGrid"; //
+import ScrollToTop from "./components/ui/ScrollToTop"; // Dodany import
 
-export default function Home() {
+// =========================================================================
+// 1. ASYNCHRONICZNE POBIERANIE DANYCH Z DRUPALA (JSON:API)
+// =========================================================================
+async function getHeroSlidesFromDrupal() {
+  try {
+    const res = await fetch(
+      "http://atutnet.ddev.site/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile&sort=field_kolejnosc",
+      { next: { revalidate: 10 } },
+    );
+
+    if (!res.ok) {
+      console.warn(
+        "[SYSTEM] Brak odpowiedzi z Drupala dla slajdów. Używam danych domyślnych.",
+      );
+      return null;
+    }
+
+    const json = await res.json();
+    if (!json.data || json.data.length === 0) return null;
+
+    const mappedSlides = json.data.map((item) => {
+      const getImageUrl = (relationshipData) => {
+        if (!relationshipData || !relationshipData.data) return null;
+        const imageNode = json.included?.find(
+          (inc) => inc.id === relationshipData.data.id,
+        );
+        return imageNode
+          ? `http://atutnet.ddev.site${imageNode.attributes.uri.url}`
+          : null;
+      };
+
+      return {
+        title: item.attributes.title,
+        subtitle: item.attributes.field_podtytul || "// ATUT 2026",
+        image: getImageUrl(item.relationships.field_zdjecie_desktop),
+        imageMobile: getImageUrl(item.relationships.field_zdjecie_mobile),
+      };
+    });
+
+    return mappedSlides;
+  } catch (error) {
+    console.error("[SYSTEM] Błąd połączenia z API Drupala:", error.message);
+    return null;
+  }
+}
+
+// =========================================================================
+// 2. GŁÓWNY WIDOK STRONY (SERVER COMPONENT)
+// =========================================================================
+export default async function HomePage() {
+  const drupalSlides = await getHeroSlidesFromDrupal();
+
   return (
-    <main className="min-h-screen bg-white">
-      <HeroSection />
-      <FeatureCards />
-      <ServicesGrid />
-      <WhyChooseUs />
-      <TechnicalTabs />
-      <PartnerLogos />
-      <LatestNews />
-      <Footer />
-    </main>
+    <>
+      <main className="relative min-h-screen bg-gray-950 font-sans text-white">
+        <Header />
+        <HeroSlider drupalSlides={drupalSlides} />
+
+        {/* 💡 TUTAJ WSTAWIAMY NOWĄ SEKCJĘ ZAMIAST TYMCZASOWEGO NAPISU */}
+        <ServicesGrid />
+      </main>
+
+      {/* ScrollToTop musi być poza main, aby fixed działał względem viewportu */}
+      <ScrollToTop />
+    </>
   );
 }
