@@ -1,7 +1,7 @@
-// components/home/HeroSlider.js
+// components/home/HeroSlider.tsx
 "use client";
 import type { HeroSlide } from "../../types";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import "swiper/css";
@@ -15,6 +15,7 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
   const [swiperInstance, setSwiperInstance] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const progressLine = useRef(null);
+  const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
 
   const onAutoplayTimeLeft = (s, time, progress) => {
     if (progressLine.current) {
@@ -22,72 +23,107 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
     }
   };
 
+  // Play/pause wideo w zależności od aktywnego slajdu
+  const handleSlideChange = useCallback((swiper) => {
+    const realIndex = swiper.realIndex;
+    setCurrentSlide(realIndex);
+
+    // Pauzuj wszystkie wideo, odpal aktywne
+    Object.entries(videoRefs.current).forEach(([idx, videoEl]) => {
+      if (!videoEl) return;
+      if (Number(idx) === realIndex) {
+        videoEl.currentTime = 0;
+        videoEl.play().catch(() => {});
+      } else {
+        videoEl.pause();
+      }
+    });
+  }, []);
+
   const defaultSlides = [
     {
       subtitle: "// INDUSTRIAL AUTOMATION",
-      title: "SYSTEMY AUTOMATYZACJI PROCESÓW TECHNOLOGICZNYCH",
+      title: "STERUJEMY PROCESAMI, KTÓRYCH INNI SIĘ NIE PODEJMUJĄ",
       image: "/images/d-slajdy-01a.jpg",
       imageMobile: "/images/m-slajdy-01a.jpg",
+      video: "/videos/hero-01.mp4",
     },
     {
-      subtitle: "// ENGINEERING PREMIUM",
-      title: "MODUŁOWA PREFABRYKACJA SYSTEMÓW",
+      subtitle: "// ATEX / STREFY Ex",
+      title: "GDZIE ISKRA = WYBUCH. TAM DZIAŁAMY",
       image: "/images/d-slajdy-02a.jpg",
       imageMobile: "/images/m-slajdy-02a.jpg",
+      video: "/videos/hero-02.mp4",
     },
     {
-      subtitle: "// SMART SENSING",
-      title: "ZAAWANSOWANE UKŁADY SENSORYCZNE",
+      subtitle: "// PREFABRYKACJA",
+      title: "RYSUJEMY. BUDUJEMY. URUCHAMIAMY",
       image: "/images/d-slajdy-03a.jpg",
       imageMobile: "/images/m-slajdy-03a.jpg",
+      video: "/videos/hero-03.mp4",
     },
     {
-      subtitle: "// SECURE AUTOMATION",
-      title: "DEDYKOWANE SYSTEMY BEZPIECZEŃSTWA",
+      subtitle: "// SCADA / AT-VISIO 3.5",
+      title: "CAŁA FABRYKA NA JEDNYM EKRANIE",
       image: "/images/d-slajdy-04a.jpg",
       imageMobile: "/images/m-slajdy-04a.jpg",
+      video: "/videos/hero-04.mp4",
     },
     {
-      subtitle: "// AIR CONDITIONING",
-      title: "PRZEMYSŁOWE UKŁADY CHŁODZENIA",
+      subtitle: "// INŻYNIERIA CAD",
+      title: "NAJPIERW 3D. POTEM RZECZYWISTOŚĆ",
       image: "/images/d-slajdy-05a.jpg",
       imageMobile: "/images/m-slajdy-05a.jpg",
+      video: "/videos/hero-05.mp4",
     },
     {
-      subtitle: "// GAS MONITORING",
-      title: "SYSTEMY POMIAROWE GAZOMETRII",
+      subtitle: "// SENSORYKA I GAZOMETRIA",
+      title: "GAZ. POWIETRZE. TEMPERATURA. WIDZIMY WSZYSTKO",
       image: "/images/d-slajdy-06a.jpg",
       imageMobile: "/images/m-slajdy-06a.jpg",
+      video: "/videos/hero-06.mp4",
     },
     {
-      subtitle: "// ENERGY MANAGEMENT",
-      title: "SYSTEMY MONITORINGU I BILANSOWANIA MEDIÓW",
+      subtitle: "// BEZPIECZEŃSTWO",
+      title: "KAŻDY CZŁOWIEK. KAŻDA MASZYNA. WIEMY GDZIE SĄ",
       image: "/images/d-slajdy-07a.jpg",
       imageMobile: "/images/m-slajdy-07a.jpg",
+      video: "/videos/hero-07.mp4",
     },
     {
-      subtitle: "// SCADA",
-      title: "NADZOROWANIE I KONTROLA PROCESÓW PRZEMYSŁOWYCH",
+      subtitle: "// KLIMATYZACJA PRZEMYSŁOWA",
+      title: "40°C W HALI? ROZWIĄZANE",
       image: "/images/d-slajdy-08a.jpg",
       imageMobile: "/images/m-slajdy-08a.jpg",
+      // brak video — ten slajd pokaże zdjęcie
     },
     {
-      subtitle: "// Ex",
-      title: "DOŚWIADCZENIE I KOMPETENCJE W STREFACH Ex",
+      subtitle: "// OŚWIETLENIE Ex",
+      title: "ŚWIATŁO W MIEJSCACH, GDZIE ZWYKŁE ZABIJA",
       image: "/images/d-slajdy-09a.jpg",
       imageMobile: "/images/m-slajdy-09a.jpg",
+      video: "/videos/hero-09.mp4",
     },
     {
-      subtitle: "// PRZEMYSŁ 4.0",
-      title: "CYFROWA TRANSFORMACJA PRZEMYSŁU",
+      subtitle: "// GÓRNICTWO",
+      title: "800 METRÓW POD ZIEMIĄ. TAM ZACZĘLIŚMY",
       image: "/images/d-slajdy-10a.jpg",
       imageMobile: "/images/m-slajdy-10a.jpg",
+      video: "/videos/hero-10.mp4",
     },
   ];
 
-  // 💡 TUTAJ JEDYNA LOGIKA: Używamy danych z Drupala, a jak ich nie ma (np. DDEV wyłączony), to Twoich defaultowych.
   const slides =
     drupalSlides && drupalSlides.length > 0 ? drupalSlides : defaultSlides;
+
+  // Detekcja mobile (wideo nie odtwarzamy na mobile — za ciężkie)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[rgb(27,52,74)]">
@@ -97,14 +133,14 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
         fadeEffect={{ crossFade: true }}
         speed={1000}
         autoplay={{
-          delay: 6000,
+          delay: 7000,
           disableOnInteraction: false,
           pauseOnMouseEnter: false,
         }}
         allowTouchMove={false}
         loop={true}
         onSwiper={setSwiperInstance}
-        onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex)}
+        onSlideChange={handleSlideChange}
         onAutoplayTimeLeft={onAutoplayTimeLeft}
         className="w-full h-full z-0"
       >
@@ -115,39 +151,55 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
           >
             {({ isActive, isPrev }) => (
               <>
+                {/* Ciemny overlay */}
                 <div
                   className="absolute inset-0 z-10 pointer-events-none"
                   style={{
                     background:
-                      "linear-gradient(135deg, rgba(27, 52, 74, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%)",
+                      "linear-gradient(135deg, rgba(22, 39, 56, 0.55) 0%, rgba(0, 0, 0, 0.2) 100%)",
                   }}
                 />
 
-                {/* 💡 TUTAJ WSTRZYKNĄŁEM DANE Z DRUPALA LUB DEFAULT */}
-                <picture>
-                  <source
-                    media="(max-width: 767px)"
-                    srcSet={slide.imageMobile || "/images/m-slajdy-01a.jpg"}
+                {/* WIDEO (desktop) lub ZDJĘCIE (mobile / brak wideo) */}
+                {slide.video && !isMobile ? (
+                  <video
+                    ref={(el) => { videoRefs.current[index] = el; }}
+                    src={slide.video}
+                    poster={slide.image || "/images/d-slajdy-01a.jpg"}
+                    autoPlay={index === 0}
+                    muted
+                    loop
+                    playsInline
+                    preload={index === 0 ? "auto" : "none"}
+                    className="absolute inset-0 w-full h-full object-cover object-center"
                   />
-                  <source
-                    media="(min-width: 768px)"
-                    srcSet={slide.image || "/images/d-slajdy-01a.jpg"}
-                  />
-                  <img
-                    src={slide.image || "/images/d-slajdy-01a.jpg"}
-                    alt={slide.title}
-                    loading={index === 0 ? "eager" : "lazy"}
-                    className={`w-full h-full object-cover object-center transition-transform ${
-                      isActive || isPrev
-                        ? "scale-105 ease-linear"
-                        : "scale-100 ease-none"
-                    }`}
-                    style={{
-                      transitionDuration: isActive || isPrev ? "7000ms" : "0ms",
-                    }}
-                  />
-                </picture>
+                ) : (
+                  <picture>
+                    <source
+                      media="(max-width: 767px)"
+                      srcSet={slide.imageMobile || "/images/m-slajdy-01a.jpg"}
+                    />
+                    <source
+                      media="(min-width: 768px)"
+                      srcSet={slide.image || "/images/d-slajdy-01a.jpg"}
+                    />
+                    <img
+                      src={slide.image || "/images/d-slajdy-01a.jpg"}
+                      alt={slide.title}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      className={`w-full h-full object-cover object-center transition-transform ${
+                        isActive || isPrev
+                          ? "scale-105 ease-linear"
+                          : "scale-100 ease-none"
+                      }`}
+                      style={{
+                        transitionDuration: isActive || isPrev ? "7000ms" : "0ms",
+                      }}
+                    />
+                  </picture>
+                )}
 
+                {/* Tekst slajdu */}
                 <div className="absolute inset-0 z-30 flex justify-center items-center pointer-events-none">
                   <div
                     className={`absolute inset-x-0 mx-auto max-w-6xl flex flex-col items-center text-center px-6 transition-all duration-1000 ease-in-out ${isActive ? "opacity-100 translate-y-0 pointer-events-auto blur-none" : "opacity-0 translate-y-4 pointer-events-none blur-md"}`}

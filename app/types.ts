@@ -4,10 +4,12 @@
 
 /** Slajd główny (HeroSlider) */
 export interface HeroSlide {
+  id?: string;
   title: string;
   subtitle: string;
   image: string | null;
   imageMobile: string | null;
+  video?: string | null;
 }
 
 /** Język w przełączniku */

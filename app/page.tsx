@@ -13,6 +13,23 @@ import ScrollToTop from "./components/ui/ScrollToTop";
 // =========================================================================
 // 1. ASYNCHRONICZNE POBIERANIE DANYCH Z DRUPALA (JSON:API)
 // =========================================================================
+
+// Mapowanie wideo na slajdy (index → ścieżka do pliku)
+// Dodawaj klipy w miarę ich cięcia w Premiere Pro.
+// Slajdy bez wpisu = pokażą zdjęcie zamiast wideo.
+const heroVideoMap: Record<number, string> = {
+  0: "/videos/hero-01.mp4",  // Systemy automatyzacji — CNC
+  1: "/videos/hero-02.mp4",  // Strefy Ex — panele
+  2: "/videos/hero-03.mp4",  // Prefabrykacja — hala
+  3: "/videos/hero-04.mp4",  // SCADA — centrum sterowania
+  4: "/videos/hero-05.mp4",  // CAD — monitory
+  5: "/videos/hero-06.mp4",  // Sensoryka — sensor A5
+  6: "/videos/hero-07.mp4",  // Bezpieczeństwo — CUKS/tunel
+  // 7: brak klipu — klimatyzacja (do uzupełnienia)
+  8: "/videos/hero-09.mp4",  // Oświetlenie Ex — LED
+  9: "/videos/hero-10.mp4",  // Górnictwo — kinowy tunel
+};
+
 async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
   try {
     const res = await fetch(
@@ -30,7 +47,7 @@ async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
     const json = await res.json();
     if (!json.data || json.data.length === 0) return null;
 
-    const mappedSlides = json.data.map((item: any) => {
+    const mappedSlides = json.data.map((item: any, index: number) => {
       const getImageUrl = (relationshipData: any) => {
         if (!relationshipData || !relationshipData.data) return null;
         const imageNode = json.included?.find(
@@ -46,6 +63,7 @@ async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
         subtitle: item.attributes.field_podtytul || "// ATUT 2026",
         image: getImageUrl(item.relationships.field_zdjecie_desktop),
         imageMobile: getImageUrl(item.relationships.field_zdjecie_mobile),
+        video: heroVideoMap[index] || null,
       };
     });
 
