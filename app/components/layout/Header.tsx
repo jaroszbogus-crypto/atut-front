@@ -54,7 +54,7 @@ export default function Header({ drupalLanguages, drupalEuProjects }: HeaderProp
     <header
       className={`left-0 w-full z-50 h-24 ${
         isScrolled
-          ? "fixed top-0 h-20 shadow-lg bg-[rgba(22,39,56,0.95)] backdrop-blur-md animate-slide-down"
+          ? "fixed top-0 h-20 border-b border-white/10 bg-[rgba(22,39,56,0.95)] backdrop-blur-md animate-slide-down"
           : "absolute top-0 bg-gradient-to-b from-black/60 to-transparent"
       }`}
     >
@@ -126,7 +126,7 @@ export default function Header({ drupalLanguages, drupalEuProjects }: HeaderProp
                 ▼
               </span>
             </button>
-            <div className="absolute right-0 top-full mt-1 w-80 bg-gray-900 border border-gray-800 shadow-2xl rounded-sm opacity-0 invisible translate-y-2 group-hover/eu:opacity-100 group-hover/eu:visible group-hover/eu:translate-y-0 transition-all duration-300 z-50">
+            <div className="absolute right-0 top-full mt-1 w-80 bg-gray-900 border border-gray-800 opacity-0 invisible translate-y-2 group-hover/eu:opacity-100 group-hover/eu:visible group-hover/eu:translate-y-0 transition-all duration-300 z-50">
               <div className="p-3 border-b border-gray-800 bg-gray-950/50">
                 <span className="text-[9px] font-mono font-bold text-red-500 uppercase tracking-widest">
                   // OSTATNIE DOTACJE
@@ -153,7 +153,7 @@ export default function Header({ drupalLanguages, drupalEuProjects }: HeaderProp
               <div className="p-3 border-t border-gray-800 bg-transparent">
                 <a
                   href="/projekty-ue"
-                  className="bg-red-600 text-white px-4 py-3 text-[10px] font-mono uppercase tracking-widest font-bold hover:bg-white hover:text-gray-900 transition-colors flex justify-center items-center gap-1.5 group rounded-md shadow-md"
+                  className="bg-red-600 text-white px-4 py-3 text-[10px] font-mono uppercase tracking-widest font-bold hover:bg-white hover:text-gray-900 transition-colors flex justify-center items-center gap-1.5 group"
                 >
                   Wszystkie projekty
                   <span className="bg-transparent text-white group-hover:text-gray-900 transition-colors">
@@ -176,7 +176,7 @@ export default function Header({ drupalLanguages, drupalEuProjects }: HeaderProp
                 ▼
               </span>
             </button>
-            <div className="absolute right-0 top-full mt-1 w-44 bg-gray-900 border border-gray-800 shadow-2xl rounded-sm opacity-0 invisible translate-y-2 group-hover/lang:opacity-100 group-hover/lang:visible group-hover/lang:translate-y-0 transition-all duration-300 z-50">
+            <div className="absolute right-0 top-full mt-1 w-44 bg-gray-900 border border-gray-800 opacity-0 invisible translate-y-2 group-hover/lang:opacity-100 group-hover/lang:visible group-hover/lang:translate-y-0 transition-all duration-300 z-50">
               <div className="py-1 font-mono text-[11px] font-bold tracking-wider">
                 {languages.map((lang, index) => (
                   <a
@@ -222,7 +222,7 @@ export default function Header({ drupalLanguages, drupalEuProjects }: HeaderProp
       </div>
 
       <div
-        className={`fixed inset-y-0 right-0 w-full sm:w-80 z-50 bg-[rgb(22,39,56)] shadow-2xl p-6 pt-10 flex flex-col gap-8 transition-transform duration-300 border-l border-white/5 md:hidden overflow-y-auto ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed inset-y-0 right-0 w-full sm:w-80 z-50 bg-[rgb(22,39,56)] p-6 pt-10 flex flex-col gap-8 transition-transform duration-300 border-l border-white/10 md:hidden overflow-y-auto ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* DEDYKOWANY KRZYŻYK DO ZAMYKANIA MENU */}
         <button
@@ -302,7 +302,7 @@ export default function Header({ drupalLanguages, drupalEuProjects }: HeaderProp
             {/* Czerwony button z licznikiem */}
             <a
               href="/projekty-ue"
-              className="mt-2 bg-red-600 text-white px-4 py-3 text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-gray-900 transition-colors flex justify-center items-center gap-1.5 group rounded-md shadow-md"
+              className="mt-2 bg-red-600 text-white px-4 py-3 text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-gray-900 transition-colors flex justify-center items-center gap-1.5 group"
             >
               Wszystkie projekty
               <span className="bg-transparent text-white group-hover:text-gray-900 transition-colors">

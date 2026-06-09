@@ -158,12 +158,12 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
                     >
                       {slide.subtitle}
                     </span>
-                    <h1 className="text-2xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight px-2 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+                    <h1 className="heading-display text-2xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight px-2 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
                       {slide.title}
                     </h1>
                     <div className="w-12 md:w-16 h-[3px] md:h-[4px] bg-red-600 mt-6 mb-6 md:mt-8 md:mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"></div>
                     <div className="w-auto px-6 sm:px-0">
-                      <button className="bg-red-600 text-white font-bold text-[10px] md:text-xs uppercase tracking-widest px-5 py-2 md:px-8 md:py-4 hover:bg-white hover:text-gray-950 transition-all duration-300 rounded-sm shadow-xl cursor-pointer relative z-40">
+                      <button className="bg-red-600 text-white font-bold text-[10px] md:text-xs uppercase tracking-widest px-5 py-2 md:px-8 md:py-4 hover:bg-white hover:text-gray-950 transition-all duration-300 cursor-pointer relative z-40">
                         Nasza Oferta
                       </button>
                     </div>
@@ -202,8 +202,8 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
           }
         }}
       >
-        <div className="w-5 h-10 border-2 border-red-600 rounded-full flex justify-center pt-1.5 shadow-[0_0_10px_rgba(220,38,38,0.4)]">
-          <div className="w-1 h-3 bg-red-500 rounded-full animate-telemetry shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div>
+        <div className="w-5 h-10 border-2 border-red-600 rounded-full flex justify-center pt-1.5">
+          <div className="w-1 h-3 bg-red-500 rounded-full animate-telemetry"></div>
         </div>
         <span className="text-[10px] font-mono font-bold text-red-500 uppercase tracking-widest drop-shadow-md">
           Przewiń
@@ -220,7 +220,7 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
               aria-label={`Przejdź do slajdu ${index + 1}`}
               aria-current={isCurrent ? "true" : "false"}
               onClick={() => swiperInstance?.slideToLoop(index, 1000)}
-              className="group relative h-1.5 md:h-2 w-6 md:w-8 overflow-hidden rounded-full bg-slate-700/60 shadow-sm transition-all hover:bg-gray-400/60 z-40 cursor-pointer"
+              className="group relative h-1.5 md:h-2 w-6 md:w-8 overflow-hidden bg-slate-700/60 transition-all hover:bg-gray-400/60 z-40 cursor-pointer"
             >
               <span
                 ref={isCurrent ? progressLine : null}

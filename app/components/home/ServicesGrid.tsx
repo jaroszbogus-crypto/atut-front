@@ -150,7 +150,7 @@ export default function ServicesGrid({ drupalHeader, drupalServices }) {
           <span className="text-red-600 font-mono text-sm uppercase tracking-wider block mb-3">
             {sectionHeader.tag}
           </span>
-          <h2 className="text-3xl md:text-5xl font-black text-gray-950 uppercase tracking-tight max-w-3xl leading-none">
+          <h2 className="heading-display text-3xl md:text-5xl font-bold text-gray-950 uppercase tracking-tight max-w-3xl leading-none">
             {sectionHeader.title}
           </h2>
           <div className="w-12 h-[3px] bg-red-600 mt-6"></div>
@@ -171,7 +171,7 @@ export default function ServicesGrid({ drupalHeader, drupalServices }) {
             return (
               <div
                 key={index} // Kafelki, zmiana koloru cienia itd...
-                className="p-8 md:p-12 bg-slate-20 hover:bg-red-600 border-r border-b border-gray-200 transition-all duration-300 flex flex-col justify-between items-center text-center group min-h-[360px] shadow-sm hover:shadow-2xl hover:-translate-y-1 transform rounded-sm"
+                className="p-8 md:p-12 bg-slate-20 hover:bg-red-600 border-r border-b border-gray-200 transition-all duration-300 flex flex-col justify-between items-center text-center group min-h-[360px] hover:-translate-y-1 transform"
               >
                 <div className="w-full flex flex-col items-center">
                   {/* Indeks numeru */}
@@ -183,14 +183,14 @@ export default function ServicesGrid({ drupalHeader, drupalServices }) {
                       W spoczynku: tło jasnoczerwone (bg-red-50), ikona czerwona (text-red-600).
                       W hoverze kafelka (group-hover): tło zmienia się na czysto białe (bg-white), 
                       a ikona zachowuje intensywną czerwień marki (text-red-600). */}
-                  <div className="p-4 bg-red-50 rounded-sm group-hover:bg-white transition-colors duration-300 mb-6 shadow-xs">
+                  <div className="p-4 bg-red-50 group-hover:bg-white transition-colors duration-300 mb-6">
                     {React.cloneElement(selectedIcon, {
                       className: `w-8 h-8 text-red-600 group-hover:text-red-600 transition-all duration-300`,
                     })}
                   </div>
 
                   {/* Tytuł usługi */}
-                  <h3 className="text-xl font-extrabold text-gray-900 uppercase tracking-tight mb-3 group-hover:text-white transition-colors duration-300">
+                  <h3 className="text-xl font-bold text-gray-900 uppercase tracking-tight mb-3 group-hover:text-white transition-colors duration-300">
                     {service.title}
                   </h3>
 

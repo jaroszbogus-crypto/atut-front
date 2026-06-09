@@ -1,34 +1,39 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script"; // 💡 Bezpieczny komponent Next.js do obsługi skryptów
+import { Inter, JetBrains_Mono, Archivo_Black } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const archivoBlack = Archivo_Black({
+  weight: "400",
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-archivo-black",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
 });
 
 export const metadata = {
-  title: "ATUT - Systemy IoT",
+  title: "ATUT — Systemy automatyki, bezpieczeństwa i monitoringu",
   description:
-    "Zaawansowane systemy automatyki przemysłowej, modułowa prefabrykacja dla Przemysłu 4.0.",
+    "Projektujemy i produkujemy systemy automatyki, bezpieczeństwa i monitoringu dla środowisk, gdzie nie ma miejsca na kompromis. Od 1989 roku.",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="pl"
-      className={`${geistSans.variable} ${geistMono.variable} h-full`}
+      className={`${archivoBlack.variable} ${inter.variable} ${jetbrainsMono.variable} h-full`}
     >
-      {/* 💡 NAPRAWA: 
-        1. Usunięto 'flex flex-col' z body - to psuło pozycjonowanie 'fixed'.
-        2. Dodano 'relative' aby body było punktem odniesienia.
-      */}
-      <body className="h-full bg-gray-950 text-white relative">
+      <body className="h-full bg-[var(--atut-paper)] text-[var(--atut-text)] relative">
         {children}
 
         {/* 🔥 Bezpieczny, oficjalny strażnik interfejsu Next.js (Rozwiązuje błąd konsoli) */}

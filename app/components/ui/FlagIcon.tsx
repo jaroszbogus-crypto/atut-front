@@ -9,7 +9,7 @@ export default function FlagIcon({ code }: FlagIconProps) {
     PL: (
       <svg
         viewBox="0 0 16 10"
-        className="w-5 h-3.5 object-cover rounded-xs border border-white/10 shadow-xs"
+        className="w-5 h-3.5 object-cover border border-white/10"
       >
         <rect width="16" height="5" fill="#fff" />
         <rect width="16" height="5" y="5" fill="#dc2626" />
@@ -18,7 +18,7 @@ export default function FlagIcon({ code }: FlagIconProps) {
     EN: (
       <svg
         viewBox="0 0 60 30"
-        className="w-5 h-3.5 object-cover rounded-xs border border-white/10 shadow-xs"
+        className="w-5 h-3.5 object-cover border border-white/10"
       >
         <clipPath id="s">
           <path d="M0,0 v30 h60 v-30 z" />
@@ -34,7 +34,7 @@ export default function FlagIcon({ code }: FlagIconProps) {
     TR: (
       <svg
         viewBox="0 0 1200 800"
-        className="w-5 h-3.5 object-cover rounded-xs border border-white/10 shadow-xs"
+        className="w-5 h-3.5 object-cover border border-white/10"
       >
         <rect width="1200" height="800" fill="#e30a17" />
         <circle cx="400" cy="400" r="200" fill="#fff" />
@@ -45,7 +45,7 @@ export default function FlagIcon({ code }: FlagIconProps) {
     VI: (
       <svg
         viewBox="0 0 900 600"
-        className="w-5 h-3.5 object-cover rounded-xs border border-white/10 shadow-xs"
+        className="w-5 h-3.5 object-cover border border-white/10"
       >
         <rect width="900" height="600" fill="#da251d" />
         <polygon
@@ -57,7 +57,7 @@ export default function FlagIcon({ code }: FlagIconProps) {
     UK: (
       <svg
         viewBox="0 0 3 2"
-        className="w-5 h-3.5 object-cover rounded-xs border border-white/10 shadow-xs"
+        className="w-5 h-3.5 object-cover border border-white/10"
       >
         <rect width="3" height="1" fill="#0057b7" />
         <rect width="3" height="1" y="1" fill="#ffd700" />
@@ -66,7 +66,7 @@ export default function FlagIcon({ code }: FlagIconProps) {
     DE: (
       <svg
         viewBox="0 0 5 3"
-        className="w-5 h-3.5 object-cover rounded-xs border border-white/10 shadow-xs"
+        className="w-5 h-3.5 object-cover border border-white/10"
       >
         <rect width="5" height="1" fill="#000" />
         <rect width="5" height="1" y="1" fill="#dd0000" />

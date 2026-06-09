@@ -1,30 +1,81 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   ATUT DESIGN SYSTEM — Swiss Industrial Print + Tactical Telemetry
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --- Paleta ATUT --- */
+  --atut-paper: #F4F4F0;
+  --atut-navy: rgb(22, 39, 56);
+  --atut-red: #E61919;
+  --atut-text: #1A1A1A;
+  --atut-text-light: #F4F4F0;
+  --atut-mono: #6B7280;
+
+  /* --- Fonty (mapowane z next/font/google) --- */
+  --font-heading: var(--font-archivo-black), 'Arial Black', sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'Courier New', monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--atut-paper);
+  --color-foreground: var(--atut-text);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* --- Bez dark mode — strona przemysłowa, jedno jasne + jedno ciemne tło --- */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--atut-paper);
+  color: var(--atut-text);
+  font-family: var(--font-body);
 }
-/* Ukrycie deweloperskich i automatycznych logotypów Next/Vercel */
+
+/* --- Grain overlay — delikatny szum na całej stronie --- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* --- Global reset: zero border-radius na elementach przemysłowych --- */
+button,
+a,
+input,
+select,
+textarea,
+[class*="card"],
+[class*="badge"],
+[class*="tag"] {
+  border-radius: 0 !important;
+}
+
+/* --- Nagłówki: domyślnie Inter Bold, Archivo Black tylko na dużych tytułach sekcji --- */
+h1, h2, h3, h4 {
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+
+/* Klasa do ręcznego zastosowania Archivo Black na wybranych nagłówkach */
+.heading-display {
+  font-family: var(--font-heading);
+}
+
+/* --- Etykiety mono --- */
+.font-mono {
+  font-family: var(--font-mono) !important;
+}
+
+/* --- Ukrycie deweloperskich logotypów --- */
 .__next-toast-container, 
 #__next-build-watcher, 
 [data-nextjs-toast-wrapper] {

@@ -33,7 +33,7 @@ export default function FeatureCards({ drupalData }) {
             <span className="text-red-200 uppercase font-mono tracking-wider text-sm block mb-2">
               {content.col1_tag}
             </span>
-            <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight mb-3 leading-tight">
+            <h3 className="text-xl md:text-2xl font-bold uppercase tracking-tight mb-3 leading-tight">
               {content.col1_title}
             </h3>
             <p className="text-red-100 text-xs md:text-sm leading-relaxed mb-6">
@@ -41,7 +41,7 @@ export default function FeatureCards({ drupalData }) {
             </p>
             <a 
               href={content.col1_url}
-              className="inline-block border border-white text-white font-semibold text-[10px] uppercase tracking-widest px-4 py-2.5 bg-transparent hover:bg-white hover:text-red-700 transition-all duration-300 rounded-sm w-full text-center md:w-auto"
+              className="inline-block border border-white text-white font-semibold text-[10px] uppercase tracking-widest px-4 py-2.5 bg-transparent hover:bg-white hover:text-red-700 transition-all duration-300 w-full text-center md:w-auto"
             >
               {content.col1_btn}
             </a>
@@ -73,7 +73,7 @@ export default function FeatureCards({ drupalData }) {
             <span className="text-red-500 uppercase font-mono tracking-wider text-sm block mb-2">
               {content.col2_tag}
             </span>
-            <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight mb-3 leading-tight">
+            <h3 className="text-xl md:text-2xl font-bold uppercase tracking-tight mb-3 leading-tight">
               {content.col2_title}
             </h3>
             {/* Zoptymalizowany, czytelniejszy odcień opisu (text-slate-300) */}
@@ -82,7 +82,7 @@ export default function FeatureCards({ drupalData }) {
             </p>
             <a 
               href={content.col2_url}
-              className="inline-block border border-slate-700 text-gray-300 font-semibold text-[10px] uppercase tracking-widest px-4 py-2.5 bg-transparent hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 rounded-sm w-full text-center md:w-auto"
+              className="inline-block border border-slate-700 text-gray-300 font-semibold text-[10px] uppercase tracking-widest px-4 py-2.5 bg-transparent hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 w-full text-center md:w-auto"
             >
               {content.col2_btn}
             </a>

@@ -44,7 +44,7 @@ export default function WhyChooseUs({ drupalData }) {
           <span className="text-red-500 font-mono text-sm uppercase tracking-wider block mb-3">
             {content.tag}
           </span>
-          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4 leading-tight">
+          <h2 className="heading-display text-3xl md:text-4xl font-bold uppercase tracking-tight mb-4 leading-tight">
             {content.title}
           </h2>
           <p className="text-gray-300 text-sm leading-relaxed mb-12 opacity-90">
@@ -61,13 +61,13 @@ export default function WhyChooseUs({ drupalData }) {
               <div key={index} className="flex gap-6 items-start relative group z-10">
                 
                 {/* Okrągły znacznik */}
-                <div className="w-10 h-10 rounded-full bg-[rgb(18,37,54)] border-2 border-red-600 flex items-center justify-center text-xs font-mono font-bold text-white flex-shrink-0 transition-colors duration-300 group-hover:bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.4)]">
+                <div className="w-10 h-10 rounded-full bg-[rgb(18,37,54)] border-2 border-red-600 flex items-center justify-center text-xs font-mono font-bold text-white flex-shrink-0 transition-colors duration-300 group-hover:bg-red-600">
                   {step.num}
                 </div>
 
                 {/* Tekst kroku */}
                 <div className="flex-1 pt-1">
-                  <h3 className="text-lg font-extrabold uppercase tracking-tight text-white group-hover:text-red-500 transition-colors duration-300">
+                  <h3 className="text-lg font-bold uppercase tracking-tight text-white group-hover:text-red-500 transition-colors duration-300">
                     {step.title}
                   </h3>
                   <p className="text-gray-300 text-xs md:text-sm leading-relaxed mt-1 opacity-80">

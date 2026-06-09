@@ -1,4 +1,5 @@
 import React from "react";
+import { MapPin, Phone } from "@phosphor-icons/react/dist/ssr";
 
 export default function Footer() {
   return (
@@ -16,7 +17,7 @@ export default function Footer() {
           />
           <div className="space-y-6">
             <div className="flex items-start gap-4 text-sm">
-              <span className="text-red-500 font-bold text-lg">📍</span>
+              <MapPin size={20} weight="bold" className="text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <p className="text-gray-300">
                 ul. Przemysłowa 12
                 <br />
@@ -24,7 +25,7 @@ export default function Footer() {
               </p>
             </div>
             <div className="flex items-start gap-4 text-sm">
-              <span className="text-red-500 font-bold text-lg">📞</span>
+              <Phone size={20} weight="bold" className="text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <p className="text-gray-300">
                 +48 32 123 45 67
                 <br />
@@ -36,7 +37,7 @@ export default function Footer() {
 
         {/* Kolumna 2: Godziny */}
         <div>
-          <h4 className="text-xl font-black uppercase mb-8 border-b border-white/10 pb-4">
+          <h4 className="text-xl font-bold uppercase mb-8 border-b border-white/10 pb-4">
             Godziny Pracy
           </h4>
           <ul className="space-y-4 text-sm font-mono">
@@ -56,8 +57,8 @@ export default function Footer() {
         </div>
 
         {/* Kolumna 3: CTA */}
-        <div className="bg-white/5 p-8 rounded-sm border border-white/10">
-          <h4 className="text-xl font-black uppercase mb-4">
+        <div className="bg-white/5 p-8 border border-white/10">
+          <h4 className="text-xl font-bold uppercase mb-4">
             Potrzebujesz Audytu?
           </h4>
           <p className="text-gray-400 text-sm mb-8 leading-relaxed">

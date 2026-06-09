@@ -13,7 +13,7 @@ export default function LatestNews({ drupalPosts }) {
         <div className="flex justify-between items-end mb-12 border-b border-gray-100 pb-8">
           <div>
             <span className="text-red-600 font-mono text-sm uppercase tracking-widest">// NEWSROOM</span>
-            <h2 className="text-3xl md:text-5xl font-black uppercase text-gray-950 mt-2 text-left">Ostatnie Realizacje</h2>
+            <h2 className="heading-display text-3xl md:text-5xl font-bold uppercase text-gray-950 mt-2 text-left">Ostatnie Realizacje</h2>
           </div>
           <button className="hidden md:block border-2 border-gray-950 px-6 py-3 font-bold text-xs uppercase tracking-widest text-gray-950 hover:bg-gray-950 hover:text-white transition-all">Zobacz Wszystkie</button>
         </div>
@@ -25,7 +25,7 @@ export default function LatestNews({ drupalPosts }) {
                 <div className="absolute top-4 left-4 bg-red-600 text-white font-mono text-[10px] px-3 py-1 z-10">{post.date}</div>
                 <img src={post.img} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={post.title} />
               </div>
-              <h3 className="text-xl font-black uppercase leading-tight text-gray-950 group-hover:text-red-600 transition-colors mb-4">{post.title}</h3>
+              <h3 className="text-xl font-bold uppercase leading-tight text-gray-950 group-hover:text-red-600 transition-colors mb-4">{post.title}</h3>
               <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-gray-950">Czytaj więcej →</span>
             </div>
           ))}
