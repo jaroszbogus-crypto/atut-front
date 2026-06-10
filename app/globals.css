@@ -81,3 +81,6 @@ h1, h2, h3, h4 {
 [data-nextjs-toast-wrapper] {
   display: none !important;
 }
+/* Opis sektora — formatowanie treści z Drupala */
+.sektor-opis p { margin-bottom: 1rem; font-size: 1.0625rem; line-height: 1.7; }
+.sektor-opis strong { font-weight: 700; color: var(--atut-navy); }

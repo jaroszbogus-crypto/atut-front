@@ -6,21 +6,21 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-fade";
+import { useRouter } from "next/navigation";
 
 interface HeroSliderProps {
   drupalSlides: HeroSlide[] | null;
 }
 
 export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
-  const [swiperInstance, setSwiperInstance] = useState(null);
+  const [swiperInstance, setSwiperInstance] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const progressLine = useRef(null);
+  const progressLine = useRef<HTMLSpanElement | null>(null);
   const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
 
-  // Detekcja mobile (lżejsze wideo / zdjęcie na małych ekranach)
   const [isMobile, setIsMobile] = useState(false);
-  // WCAG: użytkownik z "ogranicz animacje" — bez wideo i bez zoomu
   const [reducedMotion, setReducedMotion] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -38,14 +38,13 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
     };
   }, []);
 
-  const onAutoplayTimeLeft = (s, time, progress) => {
+  const onAutoplayTimeLeft = (s: any, time: number, progress: number) => {
     if (progressLine.current) {
       progressLine.current.style.width = `${(1 - progress) * 100}%`;
     }
   };
 
-  // Play/pause wideo w zależności od aktywnego slajdu
-  const handleSlideChange = useCallback((swiper) => {
+  const handleSlideChange = useCallback((swiper: any) => {
     const realIndex = swiper.realIndex;
     setCurrentSlide(realIndex);
 
@@ -71,13 +70,13 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
       videoMobile: null,
       duration: 6000,
       animationScale: 1.05,
+      sektorUrl: null,
     },
   ];
 
   const slides =
     drupalSlides && drupalSlides.length > 0 ? drupalSlides : defaultSlides;
 
-  // Czas trwania slajdu z Drupala (pierwszy slajd nadaje tempo autoplay)
   const autoplayDelay = slides[0]?.duration || 6000;
 
   return (
@@ -94,100 +93,100 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
         }}
         allowTouchMove={false}
         loop={true}
+        loopAdditionalSlides={1}
+        watchSlidesProgress={true}
         onSwiper={setSwiperInstance}
         onSlideChange={handleSlideChange}
         onAutoplayTimeLeft={onAutoplayTimeLeft}
         className="w-full h-full z-0"
       >
         {slides.map((slide, index) => {
-          // Wybór wideo: mobile → videoMobile, desktop → video
           const videoSrc = isMobile ? slide.videoMobile : slide.video;
           const showVideo = !!videoSrc && !reducedMotion;
           const scale = slide.animationScale || 1.05;
+          const isCurrent = index === currentSlide;
 
           return (
             <SwiperSlide
               key={slide.id || index}
               className="relative overflow-hidden w-full h-full"
             >
-              {({ isActive, isPrev }) => (
-                <>
-                  {/* Ciemny overlay */}
-                  <div
-                    className="absolute inset-0 z-10 pointer-events-none"
+              {/* Ciemny overlay */}
+              <div
+                className="absolute inset-0 z-10 pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(22, 39, 56, 0.55) 0%, rgba(0, 0, 0, 0.2) 100%)",
+                }}
+              />
+
+              {/* WIDEO lub ZDJĘCIE */}
+              {showVideo ? (
+                <video
+                  ref={(el) => { videoRefs.current[index] = el; }}
+                  src={videoSrc || undefined}
+                  poster={slide.image || "/images/d-slajdy-01a.jpg"}
+                  autoPlay={index === 0}
+                  muted
+                  loop
+                  playsInline
+                  preload={index === 0 ? "auto" : "none"}
+                  aria-label={slide.imageAlt || slide.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center"
+                />
+              ) : (
+                <picture>
+                  <source
+                    media="(max-width: 767px)"
+                    srcSet={slide.imageMobile || "/images/m-slajdy-01a.jpg"}
+                  />
+                  <source
+                    media="(min-width: 768px)"
+                    srcSet={slide.image || "/images/d-slajdy-01a.jpg"}
+                  />
+                  <img
+                    src={slide.image || "/images/d-slajdy-01a.jpg"}
+                    alt={slide.imageAlt || slide.title}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    className="w-full h-full object-cover object-center"
                     style={{
-                      background:
-                        "linear-gradient(135deg, rgba(22, 39, 56, 0.55) 0%, rgba(0, 0, 0, 0.2) 100%)",
+                      transform:
+                        isCurrent && !reducedMotion ? `scale(${scale})` : "scale(1)",
+                      transition:
+                        isCurrent && !reducedMotion
+                          ? `transform ${autoplayDelay}ms linear`
+                          : "none",
                     }}
                   />
-
-                  {/* WIDEO (jeśli jest i brak reduced-motion) lub ZDJĘCIE */}
-                  {showVideo ? (
-                    <video
-                      ref={(el) => { videoRefs.current[index] = el; }}
-                      src={videoSrc || undefined}
-                      poster={slide.image || "/images/d-slajdy-01a.jpg"}
-                      autoPlay={index === 0}
-                      muted
-                      loop
-                      playsInline
-                      preload={index === 0 ? "auto" : "none"}
-                      aria-label={slide.imageAlt || slide.title}
-                      className="absolute inset-0 w-full h-full object-cover object-center"
-                    />
-                  ) : (
-                    <picture>
-                      <source
-                        media="(max-width: 767px)"
-                        srcSet={slide.imageMobile || "/images/m-slajdy-01a.jpg"}
-                      />
-                      <source
-                        media="(min-width: 768px)"
-                        srcSet={slide.image || "/images/d-slajdy-01a.jpg"}
-                      />
-                      <img
-                        src={slide.image || "/images/d-slajdy-01a.jpg"}
-                        alt={slide.imageAlt || slide.title}
-                        loading={index === 0 ? "eager" : "lazy"}
-                        className="w-full h-full object-cover object-center"
-                        style={{
-                          transform:
-                            (isActive || isPrev) && !reducedMotion
-                              ? `scale(${scale})`
-                              : "scale(1)",
-                          transition:
-                            (isActive || isPrev) && !reducedMotion
-                              ? `transform ${autoplayDelay}ms linear`
-                              : "none",
-                        }}
-                      />
-                    </picture>
-                  )}
-
-                  {/* Tekst slajdu */}
-                  <div className="absolute inset-0 z-30 flex justify-center items-center pointer-events-none">
-                    <div
-                      className={`absolute inset-x-0 mx-auto max-w-6xl flex flex-col items-center text-center px-6 transition-all duration-1000 ease-in-out ${isActive ? "opacity-100 translate-y-0 pointer-events-auto blur-none" : "opacity-0 translate-y-4 pointer-events-none blur-md"}`}
-                    >
-                      <span
-                        className="text-red-500 font-mono text-xs md:text-base uppercase tracking-widest mb-4 block drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
-                        aria-live="polite"
-                      >
-                        {slide.subtitle}
-                      </span>
-                      <h1 className="heading-display text-2xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight px-2 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
-                        {slide.title}
-                      </h1>
-                      <div className="w-12 md:w-16 h-[3px] md:h-[4px] bg-red-600 mt-6 mb-6 md:mt-8 md:mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"></div>
-                      <div className="w-auto px-6 sm:px-0">
-                        <button className="bg-red-600 text-white font-bold text-[10px] md:text-xs uppercase tracking-widest px-5 py-2 md:px-8 md:py-4 hover:bg-white hover:text-gray-950 transition-all duration-300 cursor-pointer relative z-40">
-                          Nasza Oferta
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </>
+                </picture>
               )}
+
+              {/* Tekst slajdu — widoczność zależy od currentSlide */}
+              <div className="absolute inset-0 z-30 flex justify-center items-center pointer-events-none">
+                <div
+                  className={`absolute inset-x-0 mx-auto max-w-6xl flex flex-col items-center text-center px-6 transition-all duration-1000 ease-in-out ${
+                    isCurrent
+                      ? "opacity-100 translate-y-0 blur-none"
+                      : "opacity-0 translate-y-4 blur-md"
+                  }`}
+                >
+                  <span
+                    className="text-red-500 font-mono text-xs md:text-base uppercase tracking-widest mb-4 block drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
+                    aria-live="polite"
+                  >
+                    {slide.subtitle}
+                  </span>
+                  <h1 className="heading-display text-2xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight px-2 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+                    {slide.title}
+                  </h1>
+                  <div className="w-12 md:w-16 h-[3px] md:h-[4px] bg-red-600 mt-6 mb-6 md:mt-8 md:mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"></div>
+                  {slide.sektorUrl && (
+                    <button type="button" onClick={() => router.push(slide.sektorUrl!)} className={`inline-block bg-red-600 text-white font-bold text-[10px] md:text-xs uppercase tracking-widest px-5 py-2 md:px-8 md:py-4 hover:bg-white hover:text-gray-950 transition-all duration-300 cursor-pointer relative z-50 ${isCurrent ? "pointer-events-auto" : "pointer-events-none"}`}>
+                      Nasza Oferta
+                    </button>
+                  )}
+                </div>
+              </div>
             </SwiperSlide>
           );
         })}
@@ -201,7 +200,7 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
         }
       `}</style>
 
-      {/* Przycisk do przewijania w dół */}
+      {/* Przewiń w dół */}
       <div
         className="absolute bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2 opacity-60 hover:opacity-100 transition-opacity duration-300 pointer-events-auto cursor-pointer"
         onClick={(e) => {
@@ -224,6 +223,7 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
         </span>
       </div>
 
+      {/* Nawigacja kropki */}
       <div className="absolute bottom-10 left-0 w-full z-30 flex justify-center gap-3">
         {slides.map((_, index) => {
           const isCurrent = index === currentSlide;

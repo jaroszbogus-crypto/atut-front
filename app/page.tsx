@@ -36,10 +36,9 @@ const heroVideoMap: Record<number, string> = {
 async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
   try {
     const res = await fetch(
-      `${process.env.DRUPAL_BASE_URL}/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile,field_wideo_desktop,field_wideo_mobile&sort=field_waga`,
+      `${process.env.DRUPAL_BASE_URL}/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile,field_wideo_desktop,field_wideo_mobile,field_sektor&sort=field_waga`,
       { next: { revalidate: 10 } },
     );
-
     if (!res.ok) {
       console.warn("[SYSTEM] Brak odpowiedzi z Drupala dla slajdów. Używam danych domyślnych.");
       return null;
@@ -63,7 +62,15 @@ async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
     const getAlt = (relationship: any): string => {
       return relationship?.data?.meta?.alt || "";
     };
-
+// Pomocnik: wyciąga alias URL sektora z relacji field_sektor + included
+    const getSektorUrl = (relationship: any): string | null => {
+      if (!relationship?.data) return null;
+      const sektorNode = json.included?.find(
+        (inc: any) => inc.id === relationship.data.id,
+      );
+      const alias = sektorNode?.attributes?.path?.alias;
+      return alias || null;
+    };
     const mappedSlides: HeroSlide[] = json.data.map((item: any) => ({
       title: item.attributes.title,
       subtitle: item.attributes.field_podtytul || "// ATUT",
@@ -74,6 +81,7 @@ async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
       videoMobile: getFileUrl(item.relationships.field_wideo_mobile),
       duration: item.attributes.field_czas_trwania || 6000,
       animationScale: parseFloat(item.attributes.field_skala_animacji) || 1.05,
+      sektorUrl: getSektorUrl(item.relationships.field_sektor),
     }));
 
     return mappedSlides;

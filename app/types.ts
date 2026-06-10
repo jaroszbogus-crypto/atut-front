@@ -14,6 +14,7 @@ export interface HeroSlide {
   videoMobile?: string | null;
   duration?: number;
   animationScale?: number;
+  sektorUrl?: string | null;
 }
 
 /** Język w przełączniku */
