@@ -11,6 +11,7 @@ interface SektorData {
   opisHtml: string;
   zdjecie: { url: string; alt: string } | null;
   galeria: { url: string; alt: string }[];
+  zastosowania: { tytul: string; punktyHtml: string }[];
   alias: string;
 }
 
@@ -18,10 +19,9 @@ interface SektorData {
 async function getSektor(slug: string): Promise<SektorData | null> {
   try {
     const alias = `/sektory/${slug}`;
-    // Pobieramy wszystkie sektory i dopasowujemy alias w kodzie (pewniejsze niż filtr po path)
     const res = await fetch(
-      `${DRUPAL}/jsonapi/node/sektor?include=field_sektor_zdjecie,field_sektor_galeria`,
-      { next: { revalidate: 30 } },
+      `${DRUPAL}/jsonapi/node/sektor?include=field_sektor_zdjecie,field_sektor_galeria,field_sektor_zastosowania`,
+      { next: { revalidate: 5 } },
     );
     if (!res.ok) return null;
 
@@ -48,6 +48,19 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       if (f) galeria.push({ url: `${DRUPAL}${f.attributes.uri.url}`, alt: g.meta?.alt || "" });
     }
 
+    // Zastosowania (Paragraphs) — kolejność wg pola, treść z included
+    const zastosowania: { tytul: string; punktyHtml: string }[] = [];
+    const zastRel = node.relationships.field_sektor_zastosowania?.data || [];
+    for (const ref of zastRel) {
+      const para = json.included?.find((i: any) => i.id === ref.id);
+      if (para) {
+        zastosowania.push({
+          tytul: para.attributes.field_zast_tytul || "",
+          punktyHtml: para.attributes.field_zast_punkty?.processed || "",
+        });
+      }
+    }
+
     return {
       title: node.attributes.title,
       podtytul: node.attributes.field_sektor_podtytul || "",
@@ -55,6 +68,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       opisHtml: node.attributes.field_sektor_opis?.processed || "",
       zdjecie,
       galeria,
+      zastosowania,
       alias: node.attributes.path?.alias || alias,
     };
   } catch {
@@ -66,7 +80,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
 export async function generateStaticParams() {
   try {
     const res = await fetch(`${DRUPAL}/jsonapi/node/sektor`, {
-      next: { revalidate: 60 },
+      next: { revalidate: 5 },
     });
     if (!res.ok) return [];
     const json = await res.json();
@@ -148,6 +162,36 @@ export default async function SektorPage({
             className="sektor-opis text-gray-800 leading-relaxed space-y-4"
             dangerouslySetInnerHTML={{ __html: sektor.opisHtml }}
           />
+        </section>
+      )}
+
+      {/* ZASTOSOWANIA */}
+      {sektor.zastosowania.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 pb-20">
+          <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-600">
+            // Zastosowanie
+          </span>
+          <h2 className="heading-display text-2xl md:text-4xl uppercase text-[var(--atut-navy)] mt-2 mb-10">
+            Gdzie pracuje system
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200 border border-gray-200">
+            {sektor.zastosowania.map((z, i) => (
+              <article key={i} className="bg-[var(--atut-paper)] p-6 md:p-8">
+                <div className="flex items-baseline gap-3 mb-4">
+                  <span className="font-mono text-xs text-red-600">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="font-bold text-lg text-[var(--atut-navy)] leading-tight">
+                    {z.tytul}
+                  </h3>
+                </div>
+                <div
+                  className="sektor-zast text-gray-700 text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: z.punktyHtml }}
+                />
+              </article>
+            ))}
+          </div>
         </section>
       )}
 

@@ -84,3 +84,16 @@ h1, h2, h3, h4 {
 /* Opis sektora — formatowanie treści z Drupala */
 .sektor-opis p { margin-bottom: 1rem; font-size: 1.0625rem; line-height: 1.7; }
 .sektor-opis strong { font-weight: 700; color: var(--atut-navy); }
+/* Zastosowania — listy punktów */
+
+.sektor-zast ul { list-style: none; padding: 0; margin: 0; }
+.sektor-zast li { position: relative; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.sektor-zast li::before {
+  content: "▪" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0;
+  color: var(--atut-red) !important;
+  font-weight: 700;
+}
+.sektor-zast strong { font-weight: 700; color: var(--atut-navy); }
