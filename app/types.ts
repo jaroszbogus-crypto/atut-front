@@ -9,7 +9,11 @@ export interface HeroSlide {
   subtitle: string;
   image: string | null;
   imageMobile: string | null;
+  imageAlt?: string;
   video?: string | null;
+  videoMobile?: string | null;
+  duration?: number;
+  animationScale?: number;
 }
 
 /** Język w przełączniku */

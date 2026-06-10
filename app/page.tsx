@@ -30,42 +30,51 @@ const heroVideoMap: Record<number, string> = {
   9: "/videos/hero-10.mp4",  // Górnictwo — kinowy tunel
 };
 
+// =========================================================================
+// 1. POBIERANIE SLAJDÓW Z DRUPALA (JSON:API) — Drupal-first
+// =========================================================================
 async function getHeroSlidesFromDrupal(): Promise<HeroSlide[] | null> {
   try {
     const res = await fetch(
-     `${process.env.DRUPAL_BASE_URL}/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile&sort=field_waga`,
+      `${process.env.DRUPAL_BASE_URL}/jsonapi/node/slajd_glowny?include=field_zdjecie_desktop,field_zdjecie_mobile,field_wideo_desktop,field_wideo_mobile&sort=field_waga`,
       { next: { revalidate: 10 } },
     );
 
     if (!res.ok) {
-      console.warn(
-        "[SYSTEM] Brak odpowiedzi z Drupala dla slajdów. Używam danych domyślnych.",
-      );
+      console.warn("[SYSTEM] Brak odpowiedzi z Drupala dla slajdów. Używam danych domyślnych.");
       return null;
     }
 
     const json = await res.json();
     if (!json.data || json.data.length === 0) return null;
 
-    const mappedSlides = json.data.map((item: any, index: number) => {
-      const getImageUrl = (relationshipData: any) => {
-        if (!relationshipData || !relationshipData.data) return null;
-        const imageNode = json.included?.find(
-          (inc: any) => inc.id === relationshipData.data.id,
-        );
-        return imageNode
-          ? `${process.env.DRUPAL_BASE_URL}${imageNode.attributes.uri.url}`
-          : null;
-      };
+    // Pomocnik: wyciąga URL pliku (zdjęcie lub wideo) z relacji + included
+    const getFileUrl = (relationship: any): string | null => {
+      if (!relationship?.data) return null;
+      const fileNode = json.included?.find(
+        (inc: any) => inc.id === relationship.data.id,
+      );
+      return fileNode
+        ? `${process.env.DRUPAL_BASE_URL}${fileNode.attributes.uri.url}`
+        : null;
+    };
 
-      return {
-        title: item.attributes.title,
-        subtitle: item.attributes.field_podtytul || "// ATUT 2026",
-        image: getImageUrl(item.relationships.field_zdjecie_desktop),
-        imageMobile: getImageUrl(item.relationships.field_zdjecie_mobile),
-        video: heroVideoMap[index] || null,
-      };
-    });
+    // Pomocnik: wyciąga alt zdjęcia z meta relacji
+    const getAlt = (relationship: any): string => {
+      return relationship?.data?.meta?.alt || "";
+    };
+
+    const mappedSlides: HeroSlide[] = json.data.map((item: any) => ({
+      title: item.attributes.title,
+      subtitle: item.attributes.field_podtytul || "// ATUT",
+      image: getFileUrl(item.relationships.field_zdjecie_desktop),
+      imageMobile: getFileUrl(item.relationships.field_zdjecie_mobile),
+      imageAlt: getAlt(item.relationships.field_zdjecie_desktop),
+      video: getFileUrl(item.relationships.field_wideo_desktop),
+      videoMobile: getFileUrl(item.relationships.field_wideo_mobile),
+      duration: item.attributes.field_czas_trwania || 6000,
+      animationScale: parseFloat(item.attributes.field_skala_animacji) || 1.05,
+    }));
 
     return mappedSlides;
   } catch (error: any) {
