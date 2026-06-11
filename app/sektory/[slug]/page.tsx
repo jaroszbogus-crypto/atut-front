@@ -9,9 +9,10 @@ interface SektorData {
   podtytul: string;
   lead: string;
   opisHtml: string;
+  zastWstepHtml: string;
   zdjecie: { url: string; alt: string } | null;
   galeria: { url: string; alt: string }[];
-  zastosowania: { tytul: string; punktyHtml: string }[];
+  zastosowania: { tytul: string; punktyHtml: string; opisHtml: string; wyroznienie: boolean }[];
   alias: string;
 }
 
@@ -21,7 +22,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
     const alias = `/sektory/${slug}`;
     const res = await fetch(
       `${DRUPAL}/jsonapi/node/sektor?include=field_sektor_zdjecie,field_sektor_galeria,field_sektor_zastosowania`,
-      { next: { revalidate: 5 } },
+      { next: { revalidate: 0 } },
     );
     if (!res.ok) return null;
 
@@ -49,7 +50,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
     }
 
     // Zastosowania (Paragraphs) — kolejność wg pola, treść z included
-    const zastosowania: { tytul: string; punktyHtml: string }[] = [];
+    const zastosowania: { tytul: string; punktyHtml: string; opisHtml: string; wyroznienie: boolean }[] = [];
     const zastRel = node.relationships.field_sektor_zastosowania?.data || [];
     for (const ref of zastRel) {
       const para = json.included?.find((i: any) => i.id === ref.id);
@@ -57,6 +58,8 @@ async function getSektor(slug: string): Promise<SektorData | null> {
         zastosowania.push({
           tytul: para.attributes.field_zast_tytul || "",
           punktyHtml: para.attributes.field_zast_punkty?.processed || "",
+          opisHtml: para.attributes.field_zast_opis?.processed || "",
+          wyroznienie: para.attributes.field_zast_wyroznienie === true,
         });
       }
     }
@@ -66,6 +69,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       podtytul: node.attributes.field_sektor_podtytul || "",
       lead: node.attributes.field_sektor_lead || "",
       opisHtml: node.attributes.field_sektor_opis?.processed || "",
+      zastWstepHtml: node.attributes.field_sektor_zast_wstep?.processed || "",
       zdjecie,
       galeria,
       zastosowania,
@@ -80,7 +84,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
 export async function generateStaticParams() {
   try {
     const res = await fetch(`${DRUPAL}/jsonapi/node/sektor`, {
-      next: { revalidate: 5 },
+      next: { revalidate: 0 },
     });
     if (!res.ok) return [];
     const json = await res.json();
@@ -136,7 +140,7 @@ export default async function SektorPage({
           {sektor.title}
         </h1>
         {sektor.lead && (
-          <p className="mt-6 max-w-3xl text-lg md:text-xl text-gray-700 leading-relaxed">
+          <p className="mt-6 text-lg md:text-xl text-gray-700 leading-relaxed">
             {sektor.lead}
           </p>
         )}
@@ -157,7 +161,7 @@ export default async function SektorPage({
 
       {/* OPIS */}
       {sektor.opisHtml && (
-        <section className="max-w-3xl mx-auto px-6 mb-20">
+        <section className="max-w-4xl mx-auto px-6 mb-20">
           <div
             className="sektor-opis text-gray-800 leading-relaxed space-y-4"
             dangerouslySetInnerHTML={{ __html: sektor.opisHtml }}
@@ -171,12 +175,29 @@ export default async function SektorPage({
           <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-600">
             // Zastosowanie
           </span>
-          <h2 className="heading-display text-2xl md:text-4xl uppercase text-[var(--atut-navy)] mt-2 mb-10">
+          <h2 className="heading-display text-2xl md:text-4xl uppercase text-[var(--atut-navy)] mt-2 mb-6">
             Gdzie pracuje system
           </h2>
+          {sektor.zastWstepHtml && (
+            <div
+              className="sektor-opis text-gray-700 text-base leading-relaxed mb-10 space-y-4"
+              dangerouslySetInnerHTML={{ __html: sektor.zastWstepHtml }}
+            />
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200 border border-gray-200">
             {sektor.zastosowania.map((z, i) => (
-              <article key={i} className="bg-[var(--atut-paper)] p-6 md:p-8">
+              <article
+                key={i}
+                className={`relative overflow-hidden p-6 md:p-8 ${
+                  z.wyroznienie ? "bg-gray-200" : "bg-[var(--atut-paper)]"
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="heading-display pointer-events-none absolute -top-2 -left-2 text-[5rem] leading-none text-[var(--atut-navy)] opacity-[0.03] select-none"
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <div className="flex items-baseline gap-3 mb-4">
                   <span className="font-mono text-xs text-red-600">
                     {String(i + 1).padStart(2, "0")}
@@ -185,10 +206,18 @@ export default async function SektorPage({
                     {z.tytul}
                   </h3>
                 </div>
-                <div
-                  className="sektor-zast text-gray-700 text-sm leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: z.punktyHtml }}
-                />
+                {z.opisHtml && (
+                  <div
+                    className="text-gray-700 text-sm leading-relaxed mb-3"
+                    dangerouslySetInnerHTML={{ __html: z.opisHtml }}
+                  />
+                )}
+                {z.punktyHtml && (
+                  <div
+                    className="sektor-zast text-gray-700 text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: z.punktyHtml }}
+                  />
+                )}
               </article>
             ))}
           </div>
