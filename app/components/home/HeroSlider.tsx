@@ -77,8 +77,6 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
   const slides =
     drupalSlides && drupalSlides.length > 0 ? drupalSlides : defaultSlides;
 
-  const autoplayDelay = slides[0]?.duration || 6000;
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[rgb(27,52,74)]">
       <Swiper
@@ -87,7 +85,7 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
         fadeEffect={{ crossFade: true }}
         speed={1000}
         autoplay={{
-          delay: autoplayDelay,
+          delay: 6000,
           disableOnInteraction: false,
           pauseOnMouseEnter: false,
         }}
@@ -105,10 +103,12 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
           const showVideo = !!videoSrc && !reducedMotion;
           const scale = slide.animationScale || 1.05;
           const isCurrent = index === currentSlide;
+          const slideDuration = slide.duration || 6000;
 
           return (
             <SwiperSlide
               key={slide.id || index}
+              data-swiper-autoplay={slideDuration}
               className="relative overflow-hidden w-full h-full"
             >
               {/* Ciemny overlay */}
@@ -154,7 +154,7 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
                         isCurrent && !reducedMotion ? `scale(${scale})` : "scale(1)",
                       transition:
                         isCurrent && !reducedMotion
-                          ? `transform ${autoplayDelay}ms linear`
+                          ? `transform ${slideDuration}ms linear`
                           : "none",
                     }}
                   />
@@ -172,7 +172,6 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
                 >
                   <span
                     className="text-red-500 font-mono text-xs md:text-base uppercase tracking-widest mb-4 block drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
-                    aria-live="polite"
                   >
                     {slide.subtitle}
                   </span>
