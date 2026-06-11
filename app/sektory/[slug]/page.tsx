@@ -12,6 +12,7 @@ interface SektorData {
   zastWstepHtml: string;
   zdjecie: { url: string; alt: string } | null;
   galeria: { url: string; alt: string }[];
+  dokumenty: { nazwa: string; url: string; rozmiar: string }[];
   zastosowania: { tytul: string; punktyHtml: string; opisHtml: string; wyroznienie: boolean }[];
   alias: string;
 }
@@ -21,7 +22,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
   try {
     const alias = `/sektory/${slug}`;
     const res = await fetch(
-      `${DRUPAL}/jsonapi/node/sektor?include=field_sektor_zdjecie,field_sektor_galeria,field_sektor_zastosowania`,
+      `${DRUPAL}/jsonapi/node/sektor?include=field_sektor_zdjecie,field_sektor_galeria,field_sektor_zastosowania,field_sektor_dokumenty`,
       { next: { revalidate: 0 } },
     );
     if (!res.ok) return null;
@@ -49,6 +50,27 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       if (f) galeria.push({ url: `${DRUPAL}${f.attributes.uri.url}`, alt: g.meta?.alt || "" });
     }
 
+    // Dokumenty PDF
+    const formatRozmiar = (bajty: number) => {
+      if (!bajty) return "";
+      const mb = bajty / (1024 * 1024);
+      if (mb >= 1) return `${mb.toFixed(1).replace(".", ",")} MB`;
+      const kb = bajty / 1024;
+      return `${Math.round(kb)} KB`;
+    };
+    const dokumenty: { nazwa: string; url: string; rozmiar: string }[] = [];
+    const dRel = node.relationships.field_sektor_dokumenty?.data || [];
+    for (const d of dRel) {
+      const f = fileById(d.id);
+      if (f) {
+        dokumenty.push({
+          nazwa: f.attributes.filename || "Dokument",
+          url: `${DRUPAL}${f.attributes.uri.url}`,
+          rozmiar: formatRozmiar(f.attributes.filesize),
+        });
+      }
+    }
+
     // Zastosowania (Paragraphs) — kolejność wg pola, treść z included
     const zastosowania: { tytul: string; punktyHtml: string; opisHtml: string; wyroznienie: boolean }[] = [];
     const zastRel = node.relationships.field_sektor_zastosowania?.data || [];
@@ -72,6 +94,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       zastWstepHtml: node.attributes.field_sektor_zast_wstep?.processed || "",
       zdjecie,
       galeria,
+      dokumenty,
       zastosowania,
       alias: node.attributes.path?.alias || alias,
     };
@@ -221,6 +244,45 @@ export default async function SektorPage({
               </article>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* DOKUMENTY DO POBRANIA */}
+      {sektor.dokumenty.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 pb-20">
+          <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-600">
+            // Dokumenty
+          </span>
+          <h2 className="heading-display text-2xl md:text-4xl uppercase text-[var(--atut-navy)] mt-2 mb-8">
+            Do pobrania
+          </h2>
+          <ul className="space-y-px bg-gray-200 border border-gray-200">
+            {sektor.dokumenty.map((doc, i) => (
+              <li key={i} className="bg-[var(--atut-paper)]">
+                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 md:p-5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
+                  <span
+                    aria-hidden="true"
+                    className="shrink-0 w-10 h-10 flex items-center justify-center border border-[var(--atut-navy)] text-[var(--atut-navy)] font-mono text-xs font-bold"
+                  >
+                    PDF
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block font-bold text-[var(--atut-navy)] truncate group-hover:text-red-600 transition-colors">
+                      {doc.nazwa}
+                    </span>
+                    {doc.rozmiar && (
+                      <span className="block font-mono text-xs text-gray-500 mt-0.5">
+                        {doc.rozmiar}
+                      </span>
+                    )}
+                  </span>
+                  <span className="shrink-0 font-mono text-xs uppercase tracking-wider text-[var(--atut-navy)] border border-[var(--atut-navy)] px-4 py-2 group-hover:bg-[var(--atut-red)] group-hover:border-[var(--atut-red)] group-hover:text-white transition-colors">
+                    Otwórz
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
