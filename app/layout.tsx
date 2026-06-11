@@ -1,6 +1,7 @@
 import { Inter, JetBrains_Mono, Archivo_Black } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import ScrollToTop from "./components/ui/ScrollToTop";
 
 const archivoBlack = Archivo_Black({
   weight: "400",
@@ -35,8 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="h-full bg-[var(--atut-paper)] text-[var(--atut-text)] relative">
         {children}
+        <ScrollToTop />
 
-        {/* 🔥 Bezpieczny, oficjalny strażnik interfejsu Next.js (Rozwiązuje błąd konsoli) */}
+        {/* Bezpieczny strażnik interfejsu Next.js (czyści dev-overlay) */}
         <Script id="watermark-cleaner" strategy="afterInteractive">
           {`
             (function() {
@@ -63,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   }
                 });
               }
-              
+
               cleanNextElements();
               window.addEventListener('load', cleanNextElements);
               setTimeout(cleanNextElements, 500);

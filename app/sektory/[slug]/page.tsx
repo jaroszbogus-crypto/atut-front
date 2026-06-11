@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import BackButton from "../../components/ui/BackButton";
 
 const DRUPAL = process.env.DRUPAL_BASE_URL;
 
@@ -156,6 +157,9 @@ export default async function SektorPage({
     <main className="bg-[var(--atut-paper)] min-h-screen">
       {/* HERO */}
       <section className="relative pt-32 pb-16 px-6 max-w-6xl mx-auto">
+        <div className="mb-8">
+          <BackButton />
+        </div>
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-600">
           {sektor.podtytul}
         </span>
@@ -309,6 +313,12 @@ export default async function SektorPage({
           </div>
         </section>
       )}
+       {/* POWRÓT — na dole strony */}
+      <section className="max-w-6xl mx-auto px-6 pb-24 pt-4 border-t border-gray-200">
+        <div className="pt-12">
+          <BackButton />
+        </div>
+      </section>
     </main>
   );
 }
