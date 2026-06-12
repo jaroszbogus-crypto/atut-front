@@ -8,10 +8,12 @@
   /* --- Paleta ATUT --- */
   --atut-paper: #F4F4F0;
   --atut-navy: rgb(22, 39, 56);
-  --atut-red: #E61919;
+ --atut-red: #E61919;
+  --atut-red-text: #B91C1C;  /* mały czerwony tekst na jasnym tle (5.9:1) */
   --atut-text: #1A1A1A;
   --atut-text-light: #F4F4F0;
-  --atut-mono: #6B7280;
+  --atut-mono: #4B5563;      /* było #6B7280 — oblewało WCAG 4.38:1 */
+  --atut-mono-dark: #9CA3AF; /* szare mono na ciemnym tle (6.0:1) */
 
   /* --- Fonty (mapowane z next/font/google) --- */
   --font-heading: var(--font-archivo-black), 'Arial Black', sans-serif;

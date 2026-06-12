@@ -155,63 +155,76 @@ export default async function SektorPage({
 
   return (
     <main className="bg-[var(--atut-paper)] min-h-screen">
-      {/* HERO */}
-      <section className="relative pt-32 pb-16 px-6 max-w-6xl mx-auto">
+      {/* HERO — tytuł pełna szerokość, lead (4) + zdjęcie (8) od wspólnej górnej linii */}
+      <section className="pt-32 pb-16 md:pb-24 px-6 max-w-6xl mx-auto">
         <div className="mb-8">
           <BackButton />
         </div>
-        <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-600">
+        <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
           {sektor.podtytul}
         </span>
         <h1 className="heading-display text-3xl md:text-5xl lg:text-6xl uppercase text-[var(--atut-navy)] mt-4 leading-[0.95]">
           {sektor.title}
         </h1>
-        {sektor.lead && (
-          <p className="mt-6 text-lg md:text-xl text-gray-700 leading-relaxed">
-            {sektor.lead}
-          </p>
-        )}
-        <div className="w-16 h-[3px] bg-red-600 mt-8" />
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="lg:col-span-4">
+            {sektor.lead && (
+              <p className="text-lg text-gray-700 leading-relaxed">
+                {sektor.lead}
+              </p>
+            )}
+            <div className="w-16 h-[3px] bg-[var(--atut-red)] mt-8" />
+          </div>
+          {sektor.zdjecie && (
+            <figure className="lg:col-span-8">
+              <img
+                src={sektor.zdjecie.url}
+                alt={sektor.zdjecie.alt}
+                className="w-full h-auto border border-gray-200"
+                loading="eager"
+              />
+            </figure>
+          )}
+        </div>
       </section>
 
-      {/* ZDJĘCIE GŁÓWNE */}
-      {sektor.zdjecie && (
-        <section className="max-w-6xl mx-auto px-6 mb-16">
-          <img
-            src={sektor.zdjecie.url}
-            alt={sektor.zdjecie.alt}
-            className="w-full h-auto border border-gray-200"
-            loading="eager"
-          />
-        </section>
-      )}
-
-      {/* OPIS */}
+      {/* OPIS — linia podziału, label w lewej szynie, proza w prawej (8) */}
       {sektor.opisHtml && (
-        <section className="max-w-4xl mx-auto px-6 mb-20">
-          <div
-            className="sektor-opis text-gray-800 leading-relaxed space-y-4"
-            dangerouslySetInnerHTML={{ __html: sektor.opisHtml }}
-          />
+        <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
+          <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <div className="lg:col-span-4">
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
+                // Charakterystyka
+              </span>
+            </div>
+            <div
+              className="sektor-opis lg:col-span-8 text-gray-800 leading-relaxed space-y-4"
+              dangerouslySetInnerHTML={{ __html: sektor.opisHtml }}
+            />
+          </div>
         </section>
       )}
 
-      {/* ZASTOSOWANIA */}
+      {/* ZASTOSOWANIA — nagłówek w lewej szynie, wstęp w prawej, kafelki pełna szerokość */}
       {sektor.zastosowania.length > 0 && (
-        <section className="max-w-6xl mx-auto px-6 pb-20">
-          <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-600">
-            // Zastosowanie
-          </span>
-          <h2 className="heading-display text-2xl md:text-4xl uppercase text-[var(--atut-navy)] mt-2 mb-6">
-            Gdzie pracuje system
-          </h2>
-          {sektor.zastWstepHtml && (
-            <div
-              className="sektor-opis text-gray-700 text-base leading-relaxed mb-10 space-y-4"
-              dangerouslySetInnerHTML={{ __html: sektor.zastWstepHtml }}
-            />
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200 border border-gray-200">
+        <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
+          <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <header className="lg:col-span-4">
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
+                // Zastosowanie
+              </span>
+              <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-navy)] mt-2 leading-tight">
+                Gdzie pracuje system
+              </h2>
+            </header>
+            {sektor.zastWstepHtml && (
+              <div
+                className="sektor-opis lg:col-span-8 text-gray-700 text-base leading-relaxed space-y-4"
+                dangerouslySetInnerHTML={{ __html: sektor.zastWstepHtml }}
+              />
+            )}
+          </div>
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200 border border-gray-200">
             {sektor.zastosowania.map((z, i) => (
               <article
                 key={i}
@@ -226,7 +239,7 @@ export default async function SektorPage({
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div className="flex items-baseline gap-3 mb-4">
-                  <span className="font-mono text-xs text-red-600">
+                  <span className="font-mono text-xs text-[var(--atut-red-text)]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <h3 className="font-bold text-lg text-[var(--atut-navy)] leading-tight">
@@ -251,54 +264,60 @@ export default async function SektorPage({
         </section>
       )}
 
-      {/* DOKUMENTY DO POBRANIA */}
+      {/* DOKUMENTY — ciemna sekcja, nagłówek w lewej szynie, lista w prawej (8) */}
       {sektor.dokumenty.length > 0 && (
-        <section className="max-w-6xl mx-auto px-6 pb-20">
-          <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-600">
-            // Dokumenty
-          </span>
-          <h2 className="heading-display text-2xl md:text-4xl uppercase text-[var(--atut-navy)] mt-2 mb-8">
-            Do pobrania
-          </h2>
-          <ul className="space-y-px bg-gray-200 border border-gray-200">
-            {sektor.dokumenty.map((doc, i) => (
-              <li key={i} className="bg-[var(--atut-paper)]">
-                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 md:p-5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
-                  <span
-                    aria-hidden="true"
-                    className="shrink-0 w-10 h-10 flex items-center justify-center border border-[var(--atut-navy)] text-[var(--atut-navy)] font-mono text-xs font-bold"
-                  >
-                    PDF
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block font-bold text-[var(--atut-navy)] truncate group-hover:text-red-600 transition-colors">
-                      {doc.nazwa}
+        <section className="bg-[var(--atut-navy)] mb-16 md:mb-24">
+          <div className="max-w-6xl mx-auto px-6 py-16 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <header className="lg:col-span-4">
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-mono-dark)]">
+                // Dokumenty
+              </span>
+              <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-paper)] mt-2 leading-tight">
+                Do pobrania
+              </h2>
+            </header>
+            <ul className="lg:col-span-8 border border-[var(--atut-paper)]/20 divide-y divide-[var(--atut-paper)]/20 self-start">
+              {sektor.dokumenty.map((doc, i) => (
+                <li key={i}>
+                  <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 md:p-5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--atut-red)]">
+                    <span
+                      aria-hidden="true"
+                      className="shrink-0 w-10 h-10 flex items-center justify-center border border-[var(--atut-paper)] text-[var(--atut-paper)] font-mono text-xs font-bold"
+                    >
+                      PDF
                     </span>
-                    {doc.rozmiar && (
-                      <span className="block font-mono text-xs text-gray-500 mt-0.5">
-                        {doc.rozmiar}
+                    <span className="flex-1 min-w-0">
+                      <span className="block font-bold text-[var(--atut-paper)] truncate group-hover:text-white transition-colors">
+                        {doc.nazwa}
                       </span>
-                    )}
-                  </span>
-                  <span className="shrink-0 font-mono text-xs uppercase tracking-wider text-[var(--atut-navy)] border border-[var(--atut-navy)] px-4 py-2 group-hover:bg-[var(--atut-red)] group-hover:border-[var(--atut-red)] group-hover:text-white transition-colors">
-                    Otwórz
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
+                      {doc.rozmiar && (
+                        <span className="block font-mono text-xs text-[var(--atut-mono-dark)] mt-0.5">
+                          {doc.rozmiar}
+                        </span>
+                      )}
+                    </span>
+                    <span className="shrink-0 font-mono text-xs uppercase tracking-wider text-[var(--atut-paper)] border border-[var(--atut-paper)] px-4 py-2 group-hover:bg-[var(--atut-red)] group-hover:border-[var(--atut-red)] group-hover:text-white transition-colors">
+                      Otwórz
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
       )}
 
-      {/* GALERIA — prosta siatka na MVP */}
+      {/* GALERIA — nagłówek nad siatką, siatka pełna szerokość */}
       {sektor.galeria.length > 0 && (
-        <section className="max-w-6xl mx-auto px-6 pb-24">
-          <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-600">
-            // Galeria
-          </span>
-          <h2 className="heading-display text-2xl md:text-4xl uppercase text-[var(--atut-navy)] mt-2 mb-8">
-            Realizacja
-          </h2>
+        <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
+          <div className="border-t border-gray-300 pt-10 mb-10">
+            <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
+              // Galeria
+            </span>
+            <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-navy)] mt-2 leading-tight">
+              Realizacja
+            </h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {sektor.galeria.map((img, i) => (
               <figure key={i} className="border border-gray-200">
@@ -313,9 +332,10 @@ export default async function SektorPage({
           </div>
         </section>
       )}
-       {/* POWRÓT — na dole strony */}
-      <section className="max-w-6xl mx-auto px-6 pb-24 pt-4 border-t border-gray-200">
-        <div className="pt-12">
+
+      {/* POWRÓT — na dole strony */}
+      <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
+        <div className="border-t border-gray-300 pt-12">
           <BackButton />
         </div>
       </section>
