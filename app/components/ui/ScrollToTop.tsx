@@ -6,66 +6,39 @@ export default function ScrollToTop() {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      // Przycisk pojawia się po przewinięciu o 100px
       setIsVisible(window.scrollY > 100);
     };
-
     window.addEventListener("scroll", toggleVisibility, { passive: true });
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
-  // Jeśli isVisible jest false, komponent nie renderuje nic (przycisk jest niewidoczny)
   if (!isVisible) return null;
 
+  const handleClick = () => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  };
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: "40px",
-        right: "40px",
-        zIndex: "999999",
-      }}
+    <button
+      type="button"
+      onClick={handleClick}
+      aria-label="Wróć na górę"
+      className="fixed bottom-10 right-10 z-[999] w-12 h-12 flex items-center justify-center bg-[var(--atut-red)] text-white hover:bg-[var(--atut-navy)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--atut-navy)] focus-visible:ring-offset-2"
     >
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        style={{
-          padding: "12px",
-          backgroundColor: "#dc2626",
-          color: "white",
-          borderRadius: "8px",
-          cursor: "pointer",
-          border: "none",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
-          transition: "all 0.3s ease",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "48px",
-          height: "48px",
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = "#991b1b";
-          e.currentTarget.style.transform = "translateY(-5px)";
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = "#dc2626";
-          e.currentTarget.style.transform = "translateY(0)";
-        }}
-        aria-label="Wróć na górę"
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        aria-hidden="true"
       >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 19V5M5 12l7-7 7 7" />
-        </svg>
-      </button>
-    </div>
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+    </button>
   );
 }
