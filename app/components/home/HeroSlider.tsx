@@ -196,7 +196,13 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
           .animate-telemetry { animation: none; }
         }
       `}</style>
-
+{/* Cyfra aktualnego slajdu w tle — WERSJA ROBOCZA, dostroić pozycję/rozmiar/opacity */}
+      <span
+        aria-hidden="true"
+   className="heading-display pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 z-20 text-[2rem] leading-none text-white opacity-[0.15] select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+      >
+        {String(currentSlide + 1).padStart(2, "0")}
+      </span>
  {/* Strzałki nawigacji lewo/prawo — kwadrat z ramką, transparentne tło */}
       <button
         type="button"
