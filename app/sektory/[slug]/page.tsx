@@ -234,12 +234,12 @@ export default async function SektorPage({
               >
                 <span
                   aria-hidden="true"
-                  className="heading-display pointer-events-none absolute -top-2 -left-2 text-[5rem] leading-none text-[var(--atut-navy)] opacity-[0.03] select-none"
+                  className="heading-display pointer-events-none absolute -top-0 -right-0 text-[6rem] leading-none text-[var(--atut-navy)] opacity-[0.03] select-none"
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div className="flex items-baseline gap-3 mb-4">
-                  <span className="font-mono text-xs text-[var(--atut-red-text)]">
+                  <span className="font-mono text-sm font-bold text-[var(--atut-red-text)]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <h3 className="font-bold text-lg text-[var(--atut-navy)] leading-tight">
