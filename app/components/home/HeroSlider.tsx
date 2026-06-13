@@ -197,6 +197,28 @@ export default function HeroSlider({ drupalSlides }: HeroSliderProps) {
         }
       `}</style>
 
+ {/* Strzałki nawigacji lewo/prawo — kwadrat z ramką, transparentne tło */}
+      <button
+        type="button"
+        aria-label="Poprzedni slajd"
+        onClick={() => swiperInstance?.slidePrev(1000)}
+        className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 items-center justify-center border-2 border-white/40 text-white hover:bg-white hover:text-[var(--atut-navy)] hover:border-white transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--atut-red)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        aria-label="Następny slajd"
+        onClick={() => swiperInstance?.slideNext(1000)}
+        className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 items-center justify-center border-2 border-white/40 text-white hover:bg-white hover:text-[var(--atut-navy)] hover:border-white transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--atut-red)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </button>
+
       {/* Przewiń w dół */}
       <div
         className="absolute bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2 opacity-60 hover:opacity-100 transition-opacity duration-300 pointer-events-auto cursor-pointer"
