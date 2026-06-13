@@ -234,7 +234,7 @@ export default async function SektorPage({
               >
                 <span
                   aria-hidden="true"
-                  className="heading-display pointer-events-none absolute -top-0 -right-0 text-[6rem] leading-none text-[var(--atut-navy)] opacity-[0.03] select-none"
+                  className="heading-display pointer-events-none absolute -top-0 right-3 text-[6rem] leading-none text-[var(--atut-navy)] opacity-[0.03] select-none"
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
