@@ -4,13 +4,13 @@ import BackButton from "../../components/ui/BackButton";
 
 const DRUPAL = process.env.DRUPAL_BASE_URL;
 
-// --- Typ sektora (lokalny, na potrzeby tej podstrony) ---
 interface SektorData {
   title: string;
   podtytul: string;
   lead: string;
   opisHtml: string;
   zastWstepHtml: string;
+  zastTytul: string;
   zdjecie: { url: string; alt: string } | null;
   galeria: { url: string; alt: string }[];
   dokumenty: { nazwa: string; url: string; rozmiar: string }[];
@@ -18,7 +18,6 @@ interface SektorData {
   alias: string;
 }
 
-// --- Pobieranie pojedynczego sektora po aliasie /sektory/[slug] ---
 async function getSektor(slug: string): Promise<SektorData | null> {
   try {
     const alias = `/sektory/${slug}`;
@@ -51,7 +50,6 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       if (f) galeria.push({ url: `${DRUPAL}${f.attributes.uri.url}`, alt: g.meta?.alt || "" });
     }
 
-    // Dokumenty PDF
     const formatRozmiar = (bajty: number) => {
       if (!bajty) return "";
       const mb = bajty / (1024 * 1024);
@@ -72,7 +70,6 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       }
     }
 
-    // Zastosowania (Paragraphs) — kolejność wg pola, treść z included
     const zastosowania: { tytul: string; punktyHtml: string; opisHtml: string; wyroznienie: boolean }[] = [];
     const zastRel = node.relationships.field_sektor_zastosowania?.data || [];
     for (const ref of zastRel) {
@@ -93,6 +90,7 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       lead: node.attributes.field_sektor_lead || "",
       opisHtml: node.attributes.field_sektor_opis?.processed || "",
       zastWstepHtml: node.attributes.field_sektor_zast_wstep?.processed || "",
+      zastTytul: node.attributes.field_sektor_zast_tytul || "Przeznaczenie systemu",
       zdjecie,
       galeria,
       dokumenty,
@@ -104,7 +102,6 @@ async function getSektor(slug: string): Promise<SektorData | null> {
   }
 }
 
-// --- Lista slugów do pre-renderowania (SEO + wydajność) ---
 export async function generateStaticParams() {
   try {
     const res = await fetch(`${DRUPAL}/jsonapi/node/sektor`, {
@@ -121,7 +118,6 @@ export async function generateStaticParams() {
   }
 }
 
-// --- SEO: title + description z Drupala ---
 export async function generateMetadata({
   params,
 }: {
@@ -143,7 +139,6 @@ export async function generateMetadata({
   };
 }
 
-// --- Strona ---
 export default async function SektorPage({
   params,
 }: {
@@ -155,7 +150,6 @@ export default async function SektorPage({
 
   return (
     <main className="bg-[var(--atut-paper)] min-h-screen">
-      {/* HERO — tytuł pełna szerokość, lead (4) + zdjęcie (8) od wspólnej górnej linii */}
       <section className="pt-32 pb-16 md:pb-24 px-6 max-w-6xl mx-auto">
         <div className="mb-8">
           <BackButton />
@@ -188,7 +182,6 @@ export default async function SektorPage({
         </div>
       </section>
 
-      {/* OPIS — linia podziału, label w lewej szynie, proza w prawej (8) */}
       {sektor.opisHtml && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -205,7 +198,6 @@ export default async function SektorPage({
         </section>
       )}
 
-      {/* ZASTOSOWANIA — nagłówek w lewej szynie, wstęp w prawej, kafelki pełna szerokość */}
       {sektor.zastosowania.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -214,7 +206,7 @@ export default async function SektorPage({
                 // Zastosowanie
               </span>
               <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-navy)] mt-2 leading-tight">
-                Gdzie pracuje system
+                {sektor.zastTytul}
               </h2>
             </header>
             {sektor.zastWstepHtml && (
@@ -228,8 +220,10 @@ export default async function SektorPage({
             {sektor.zastosowania.map((z, i) => (
               <article
                 key={i}
-                className={`relative overflow-hidden p-6 md:p-8 border-r border-b border-gray-200 ${
-                  z.wyroznienie ? "bg-gray-200" : "bg-[var(--atut-paper)]"
+                 className={`relative overflow-hidden p-6 md:p-8 border-r border-b border-gray-200 ${
+                  z.wyroznienie
+                    ? "bg-gray-200 ring-1 ring-inset ring-gray-400"
+                    : "bg-[var(--atut-paper)]"
                 }`}
               >
                 <span
@@ -242,7 +236,7 @@ export default async function SektorPage({
                   <span className="font-mono text-sm font-bold text-[var(--atut-red-text)]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <h3 className="font-bold text-lg text-[var(--atut-navy)] leading-tight">
+                  <h3 className={`text-lg text-[var(--atut-navy)] leading-tight ${z.wyroznienie ? "font-extrabold" : "font-bold"}`}>
                     {z.tytul}
                   </h3>
                 </div>
@@ -264,7 +258,6 @@ export default async function SektorPage({
         </section>
       )}
 
-      {/* DOKUMENTY — ciemna sekcja, nagłówek w lewej szynie, lista w prawej (8) */}
       {sektor.dokumenty.length > 0 && (
         <section className="bg-[var(--atut-navy)] mb-16 md:mb-24">
           <div className="max-w-6xl mx-auto px-6 py-16 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -307,7 +300,6 @@ export default async function SektorPage({
         </section>
       )}
 
-      {/* GALERIA — nagłówek nad siatką, siatka pełna szerokość */}
       {sektor.galeria.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 mb-10">
@@ -333,7 +325,6 @@ export default async function SektorPage({
         </section>
       )}
 
-      {/* POWRÓT — na dole strony */}
       <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
         <div className="border-t border-gray-300 pt-12">
           <BackButton />

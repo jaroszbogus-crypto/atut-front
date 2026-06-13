@@ -6,22 +6,32 @@ import Breadcrumbs from "../../components/shared/Breadcrumbs";
 
 const DRUPAL = process.env.DRUPAL_BASE_URL;
 
+interface Kafelek {
+  tytul: string;
+  opisHtml: string;
+  punktyHtml: string;
+  wyroznienie: boolean;
+}
+
 interface SystemData {
   title: string;
   podtytul: string;
   lead: string;
   opisHtml: string;
+  funkcjeTytul: string;
+  zastTytul: string;
   zdjecie: { url: string; alt: string } | null;
   wideo: string | null;
   galeria: { url: string; alt: string }[];
   dokumenty: { nazwa: string; url: string; rozmiar: string }[];
-  funkcje: { tytul: string; opisHtml: string; punktyHtml: string }[];
+  funkcje: Kafelek[];
+  zastosowania: Kafelek[];
   parametry: { nazwa: string; wartosc: string }[];
   alias: string;
 }
 
 const INCLUDE =
-  "field_sys_zdjecie.field_media_image,field_sys_wideo,field_sys_funkcje,field_sys_parametry,field_sys_dokumenty,field_sys_galeria.field_media_image";
+  "field_sys_zdjecie.field_media_image,field_sys_wideo,field_sys_funkcje,field_sys_zastosowania,field_sys_parametry,field_sys_dokumenty,field_sys_galeria.field_media_image";
 
 async function getSystem(slug: string): Promise<SystemData | null> {
   try {
@@ -41,7 +51,6 @@ async function getSystem(slug: string): Promise<SystemData | null> {
     const incById = (id: string) =>
       json.included?.find((i: any) => i.id === id);
 
-    // Zdjęcie/galeria są przez Media: relacja -> media--image -> field_media_image -> file--file
     const mediaToImg = (mediaId: string): { url: string; alt: string } | null => {
       const media = incById(mediaId);
       if (!media) return null;
@@ -55,12 +64,21 @@ async function getSystem(slug: string): Promise<SystemData | null> {
       };
     };
 
-    // Zdjęcie główne
+    const readZastosowanie = (ref: any): Kafelek | null => {
+      const para = incById(ref.id);
+      if (!para) return null;
+      return {
+        tytul: para.attributes.field_zast_tytul || "",
+        opisHtml: para.attributes.field_zast_opis?.processed || "",
+        punktyHtml: para.attributes.field_zast_punkty?.processed || "",
+        wyroznienie: para.attributes.field_zast_wyroznienie === true,
+      };
+    };
+
     let zdjecie = null;
     const zRel = node.relationships.field_sys_zdjecie?.data;
     if (zRel) zdjecie = mediaToImg(zRel.id);
 
-    // Wideo (plik bezpośredni, opcjonalne)
     let wideo: string | null = null;
     const wRel = node.relationships.field_sys_wideo?.data;
     if (wRel) {
@@ -68,7 +86,6 @@ async function getSystem(slug: string): Promise<SystemData | null> {
       if (f) wideo = `${DRUPAL}${f.attributes.uri.url}`;
     }
 
-    // Galeria (Media, wiele)
     const galeria: { url: string; alt: string }[] = [];
     const gRel = node.relationships.field_sys_galeria?.data || [];
     for (const g of gRel) {
@@ -76,7 +93,6 @@ async function getSystem(slug: string): Promise<SystemData | null> {
       if (img) galeria.push(img);
     }
 
-    // Dokumenty PDF (plik bezpośredni, wiele)
     const formatRozmiar = (bajty: number) => {
       if (!bajty) return "";
       const mb = bajty / (1024 * 1024);
@@ -97,8 +113,7 @@ async function getSystem(slug: string): Promise<SystemData | null> {
       }
     }
 
-    // Funkcje (Paragraphs)
-    const funkcje: { tytul: string; opisHtml: string; punktyHtml: string }[] = [];
+    const funkcje: Kafelek[] = [];
     const fRel = node.relationships.field_sys_funkcje?.data || [];
     for (const ref of fRel) {
       const para = incById(ref.id);
@@ -107,11 +122,18 @@ async function getSystem(slug: string): Promise<SystemData | null> {
           tytul: para.attributes.field_fun_tytul || "",
           opisHtml: para.attributes.field_fun_opis?.processed || "",
           punktyHtml: para.attributes.field_fun_punkty?.processed || "",
+          wyroznienie: para.attributes.field_fun_wyroznienie === true,
         });
       }
     }
 
-    // Parametry (Paragraphs)
+    const zastosowania: Kafelek[] = [];
+    const zaRel = node.relationships.field_sys_zastosowania?.data || [];
+    for (const ref of zaRel) {
+      const k = readZastosowanie(ref);
+      if (k) zastosowania.push(k);
+    }
+
     const parametry: { nazwa: string; wartosc: string }[] = [];
     const pRel = node.relationships.field_sys_parametry?.data || [];
     for (const ref of pRel) {
@@ -129,11 +151,14 @@ async function getSystem(slug: string): Promise<SystemData | null> {
       podtytul: node.attributes.field_sys_podtytul || "",
       lead: node.attributes.field_sys_lead || "",
       opisHtml: node.attributes.field_sys_opis?.processed || "",
+      funkcjeTytul: node.attributes.field_sys_funkcje_tytul || "Możliwości systemu",
+      zastTytul: node.attributes.field_sys_zast_tytul || "Przeznaczenie systemu",
       zdjecie,
       wideo,
       galeria,
       dokumenty,
       funkcje,
+      zastosowania,
       parametry,
       alias: node.attributes.path?.alias || alias,
     };
@@ -179,6 +204,54 @@ export async function generateMetadata({
   };
 }
 
+function KafelkiGrid({ kafelki }: { kafelki: Kafelek[] }) {
+  return (
+    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 border-t border-l border-gray-200">
+      {kafelki.map((k, i) => (
+        <article
+          key={i}
+          className={`relative overflow-hidden p-6 md:p-8 border-r border-b border-gray-200 ${
+            k.wyroznienie
+              ? "bg-gray-200 ring-1 ring-inset ring-gray-400"
+              : "bg-[var(--atut-paper)]"
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className="heading-display pointer-events-none absolute -top-0 right-3 text-[6rem] leading-none text-[var(--atut-navy)] opacity-[0.03] select-none"
+          >
+            {String(i + 1).padStart(2, "0")}
+          </span>
+          <div className="flex items-baseline gap-3 mb-4">
+            <span className="font-mono text-sm font-bold text-[var(--atut-red-text)]">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <h3
+              className={`text-lg text-[var(--atut-navy)] leading-tight ${
+                k.wyroznienie ? "font-extrabold" : "font-bold"
+              }`}
+            >
+              {k.tytul}
+            </h3>
+          </div>
+          {k.opisHtml && (
+            <div
+              className="text-gray-700 text-sm leading-relaxed mb-3"
+              dangerouslySetInnerHTML={{ __html: k.opisHtml }}
+            />
+          )}
+          {k.punktyHtml && (
+            <div
+              className="sektor-zast text-gray-700 text-sm leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: k.punktyHtml }}
+            />
+          )}
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export default async function SystemPage({
   params,
 }: {
@@ -194,7 +267,6 @@ export default async function SystemPage({
     { label: system.title, href: null },
   ];
 
-  // schema.org Product (JSON-LD)
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -211,7 +283,6 @@ export default async function SystemPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* HERO */}
       <section className="pt-32 pb-16 md:pb-24 px-6 max-w-6xl mx-auto">
         <Breadcrumbs crumbs={breadcrumbs} />
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
@@ -241,7 +312,6 @@ export default async function SystemPage({
         </div>
       </section>
 
-      {/* OPIS */}
       {system.opisHtml && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -258,7 +328,6 @@ export default async function SystemPage({
         </section>
       )}
 
-      {/* FUNKCJE — kafelki */}
       {system.funkcje.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -267,49 +336,30 @@ export default async function SystemPage({
                 // Funkcje
               </span>
               <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-navy)] mt-2 leading-tight">
-                Co potrafi system
+                {system.funkcjeTytul}
               </h2>
             </header>
           </div>
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 border-t border-l border-gray-200">
-  {system.funkcje.map((f, i) => (
-              <article
-                key={i}
-                className="relative overflow-hidden p-6 md:p-8 bg-[var(--atut-paper)] border-r border-b border-gray-200"
-              >
-                <span
-                  aria-hidden="true"
-                  className="heading-display pointer-events-none absolute -top-0 right-3 text-[6rem] leading-none text-[var(--atut-navy)] opacity-[0.03] select-none"
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <div className="flex items-baseline gap-3 mb-4">
-                  <span className="font-mono text-sm font-bold text-[var(--atut-red-text)]">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="font-bold text-lg text-[var(--atut-navy)] leading-tight">
-                    {f.tytul}
-                  </h3>
-                </div>
-                {f.opisHtml && (
-                  <div
-                    className="text-gray-700 text-sm leading-relaxed mb-3"
-                    dangerouslySetInnerHTML={{ __html: f.opisHtml }}
-                  />
-                )}
-                {f.punktyHtml && (
-                  <div
-                    className="sektor-zast text-gray-700 text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: f.punktyHtml }}
-                  />
-                )}
-              </article>
-            ))}
-          </div>
+          <KafelkiGrid kafelki={system.funkcje} />
         </section>
       )}
 
-      {/* PARAMETRY — tabliczka mono */}
+      {system.zastosowania.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
+          <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <header className="lg:col-span-4">
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
+                // Zastosowanie
+              </span>
+              <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-navy)] mt-2 leading-tight">
+                {system.zastTytul}
+              </h2>
+            </header>
+          </div>
+          <KafelkiGrid kafelki={system.zastosowania} />
+        </section>
+      )}
+
       {system.parametry.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -342,7 +392,6 @@ export default async function SystemPage({
         </section>
       )}
 
-      {/* DOKUMENTY — ciemna sekcja */}
       {system.dokumenty.length > 0 && (
         <section className="bg-[var(--atut-navy)] mb-16 md:mb-24">
           <div className="max-w-6xl mx-auto px-6 py-16 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -385,7 +434,6 @@ export default async function SystemPage({
         </section>
       )}
 
-      {/* GALERIA */}
       {system.galeria.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 mb-10">
@@ -411,7 +459,6 @@ export default async function SystemPage({
         </section>
       )}
 
-      {/* POWRÓT */}
       <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
         <div className="border-t border-gray-300 pt-12">
           <BackButton />
