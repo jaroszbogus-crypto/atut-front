@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import BackButton from "../../components/ui/BackButton";
 import HeroMedia from "../../components/shared/HeroMedia";
 import Breadcrumbs from "../../components/shared/Breadcrumbs";
+import BreadcrumbsBar from "../../components/shared/BreadcrumbsBar";
 
 const DRUPAL = process.env.DRUPAL_BASE_URL;
 
@@ -264,7 +265,7 @@ export default async function SystemPage({
   const breadcrumbs = [
     { label: "Strona główna", href: "/" },
     { label: "Systemy", href: "/systemy" },
-    { label: system.title, href: null },
+   { label: system.title, href: null },
   ];
 
   const jsonLd = {
@@ -284,7 +285,9 @@ export default async function SystemPage({
       />
 
       <section className="pt-32 pb-16 md:pb-24 px-6 max-w-6xl mx-auto">
-        <Breadcrumbs crumbs={breadcrumbs} />
+        <div className="mb-10">
+          <BreadcrumbsBar crumbs={breadcrumbs} />
+        </div>
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
           {system.podtytul}
         </span>
@@ -459,9 +462,10 @@ export default async function SystemPage({
         </section>
       )}
 
+      {/* NAWIGACJA DOLNA */}
       <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
-        <div className="border-t border-gray-300 pt-12">
-          <BackButton />
+        <div className="pt-12">
+          <BreadcrumbsBar crumbs={breadcrumbs} />
         </div>
       </section>
     </main>

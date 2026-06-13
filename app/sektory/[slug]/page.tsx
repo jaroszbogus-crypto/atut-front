@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import BackButton from "../../components/ui/BackButton";
+import BreadcrumbsBar from "../../components/shared/BreadcrumbsBar";
 
 const DRUPAL = process.env.DRUPAL_BASE_URL;
 
@@ -148,11 +148,17 @@ export default async function SektorPage({
   const sektor = await getSektor(slug);
   if (!sektor) notFound();
 
+  const breadcrumbs = [
+    { label: "Strona główna", href: "/" },
+    { label: "Sektory", href: "/sektory" },
+    { label: sektor.title, href: null },
+  ];
+
   return (
     <main className="bg-[var(--atut-paper)] min-h-screen">
       <section className="pt-32 pb-16 md:pb-24 px-6 max-w-6xl mx-auto">
-        <div className="mb-8">
-          <BackButton />
+        <div className="mb-10">
+          <BreadcrumbsBar crumbs={breadcrumbs} />
         </div>
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
           {sektor.podtytul}
@@ -220,9 +226,9 @@ export default async function SektorPage({
             {sektor.zastosowania.map((z, i) => (
               <article
                 key={i}
-                 className={`relative overflow-hidden p-6 md:p-8 border-r border-b border-gray-200 ${
+                className={`relative overflow-hidden p-6 md:p-8 border-r border-b border-gray-200 ${
                   z.wyroznienie
-                    ? "bg-gray-200 ring-1 ring-inset ring-gray-400"
+                    ? "bg-gray-200 border-2 border-[var(--atut-red)]"
                     : "bg-[var(--atut-paper)]"
                 }`}
               >
@@ -325,9 +331,10 @@ export default async function SektorPage({
         </section>
       )}
 
+      {/* NAWIGACJA DOLNA */}
       <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
-        <div className="border-t border-gray-300 pt-12">
-          <BackButton />
+        <div className="pt-12">
+          <BreadcrumbsBar crumbs={breadcrumbs} />
         </div>
       </section>
     </main>

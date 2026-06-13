@@ -8,7 +8,7 @@ export default function FeatureCards({ drupalData }) {
     col1_desc: drupalData?.col1_desc || "Tworzymy zaawansowane technologicznie systemy dla przemysłu w oparciu o najwyższe standardy IoT",
     col1_btn: drupalData?.col1_btn || "NASZE STANDARDY",
     col1_img: drupalData?.col1_img || "/images/d-fc-systemy.jpg",
-    col1_url: drupalData?.col1_url || "/oferta/systemy-iot", // Domyślny link dla pierwszego zdjęcia
+    col1_url: drupalData?.col1_url || "/systemy", // Domyślny link dla pierwszego zdjęcia
 
     col2_tag: drupalData?.col2_tag || "// PRZEMYSŁ",
     col2_title: drupalData?.col2_title || "URZĄDZENIA",
