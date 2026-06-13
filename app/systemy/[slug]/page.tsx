@@ -1,29 +1,33 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BackButton from "../../components/ui/BackButton";
+import HeroMedia from "../../components/shared/HeroMedia";
+import Breadcrumbs from "../../components/shared/Breadcrumbs";
 
 const DRUPAL = process.env.DRUPAL_BASE_URL;
 
-// --- Typ sektora (lokalny, na potrzeby tej podstrony) ---
-interface SektorData {
+interface SystemData {
   title: string;
   podtytul: string;
   lead: string;
   opisHtml: string;
-  zastWstepHtml: string;
   zdjecie: { url: string; alt: string } | null;
+  wideo: string | null;
   galeria: { url: string; alt: string }[];
   dokumenty: { nazwa: string; url: string; rozmiar: string }[];
-  zastosowania: { tytul: string; punktyHtml: string; opisHtml: string; wyroznienie: boolean }[];
+  funkcje: { tytul: string; opisHtml: string; punktyHtml: string }[];
+  parametry: { nazwa: string; wartosc: string }[];
   alias: string;
 }
 
-// --- Pobieranie pojedynczego sektora po aliasie /sektory/[slug] ---
-async function getSektor(slug: string): Promise<SektorData | null> {
+const INCLUDE =
+  "field_sys_zdjecie.field_media_image,field_sys_wideo,field_sys_funkcje,field_sys_parametry,field_sys_dokumenty,field_sys_galeria.field_media_image";
+
+async function getSystem(slug: string): Promise<SystemData | null> {
   try {
-    const alias = `/sektory/${slug}`;
+    const alias = `/systemy/${slug}`;
     const res = await fetch(
-      `${DRUPAL}/jsonapi/node/sektor?include=field_sektor_zdjecie,field_sektor_galeria,field_sektor_zastosowania,field_sektor_dokumenty`,
+      `${DRUPAL}/jsonapi/node/system?include=${INCLUDE}`,
       { next: { revalidate: 0 } },
     );
     if (!res.ok) return null;
@@ -34,24 +38,45 @@ async function getSektor(slug: string): Promise<SektorData | null> {
     );
     if (!node) return null;
 
-    const fileById = (id: string) =>
+    const incById = (id: string) =>
       json.included?.find((i: any) => i.id === id);
 
+    // Zdjęcie/galeria są przez Media: relacja -> media--image -> field_media_image -> file--file
+    const mediaToImg = (mediaId: string): { url: string; alt: string } | null => {
+      const media = incById(mediaId);
+      if (!media) return null;
+      const fileRel = media.relationships?.field_media_image?.data;
+      if (!fileRel) return null;
+      const file = incById(fileRel.id);
+      if (!file) return null;
+      return {
+        url: `${DRUPAL}${file.attributes.uri.url}`,
+        alt: fileRel.meta?.alt || "",
+      };
+    };
+
+    // Zdjęcie główne
     let zdjecie = null;
-    const zRel = node.relationships.field_sektor_zdjecie?.data;
-    if (zRel) {
-      const f = fileById(zRel.id);
-      if (f) zdjecie = { url: `${DRUPAL}${f.attributes.uri.url}`, alt: zRel.meta?.alt || "" };
+    const zRel = node.relationships.field_sys_zdjecie?.data;
+    if (zRel) zdjecie = mediaToImg(zRel.id);
+
+    // Wideo (plik bezpośredni, opcjonalne)
+    let wideo: string | null = null;
+    const wRel = node.relationships.field_sys_wideo?.data;
+    if (wRel) {
+      const f = incById(wRel.id);
+      if (f) wideo = `${DRUPAL}${f.attributes.uri.url}`;
     }
 
+    // Galeria (Media, wiele)
     const galeria: { url: string; alt: string }[] = [];
-    const gRel = node.relationships.field_sektor_galeria?.data || [];
+    const gRel = node.relationships.field_sys_galeria?.data || [];
     for (const g of gRel) {
-      const f = fileById(g.id);
-      if (f) galeria.push({ url: `${DRUPAL}${f.attributes.uri.url}`, alt: g.meta?.alt || "" });
+      const img = mediaToImg(g.id);
+      if (img) galeria.push(img);
     }
 
-    // Dokumenty PDF
+    // Dokumenty PDF (plik bezpośredni, wiele)
     const formatRozmiar = (bajty: number) => {
       if (!bajty) return "";
       const mb = bajty / (1024 * 1024);
@@ -60,9 +85,9 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       return `${Math.round(kb)} KB`;
     };
     const dokumenty: { nazwa: string; url: string; rozmiar: string }[] = [];
-    const dRel = node.relationships.field_sektor_dokumenty?.data || [];
+    const dRel = node.relationships.field_sys_dokumenty?.data || [];
     for (const d of dRel) {
-      const f = fileById(d.id);
+      const f = incById(d.id);
       if (f) {
         dokumenty.push({
           nazwa: f.attributes.filename || "Dokument",
@@ -72,31 +97,44 @@ async function getSektor(slug: string): Promise<SektorData | null> {
       }
     }
 
-    // Zastosowania (Paragraphs) — kolejność wg pola, treść z included
-    const zastosowania: { tytul: string; punktyHtml: string; opisHtml: string; wyroznienie: boolean }[] = [];
-    const zastRel = node.relationships.field_sektor_zastosowania?.data || [];
-    for (const ref of zastRel) {
-      const para = json.included?.find((i: any) => i.id === ref.id);
+    // Funkcje (Paragraphs)
+    const funkcje: { tytul: string; opisHtml: string; punktyHtml: string }[] = [];
+    const fRel = node.relationships.field_sys_funkcje?.data || [];
+    for (const ref of fRel) {
+      const para = incById(ref.id);
       if (para) {
-        zastosowania.push({
-          tytul: para.attributes.field_zast_tytul || "",
-          punktyHtml: para.attributes.field_zast_punkty?.processed || "",
-          opisHtml: para.attributes.field_zast_opis?.processed || "",
-          wyroznienie: para.attributes.field_zast_wyroznienie === true,
+        funkcje.push({
+          tytul: para.attributes.field_fun_tytul || "",
+          opisHtml: para.attributes.field_fun_opis?.processed || "",
+          punktyHtml: para.attributes.field_fun_punkty?.processed || "",
+        });
+      }
+    }
+
+    // Parametry (Paragraphs)
+    const parametry: { nazwa: string; wartosc: string }[] = [];
+    const pRel = node.relationships.field_sys_parametry?.data || [];
+    for (const ref of pRel) {
+      const para = incById(ref.id);
+      if (para) {
+        parametry.push({
+          nazwa: para.attributes.field_par_nazwa || "",
+          wartosc: para.attributes.field_par_wartosc || "",
         });
       }
     }
 
     return {
       title: node.attributes.title,
-      podtytul: node.attributes.field_sektor_podtytul || "",
-      lead: node.attributes.field_sektor_lead || "",
-      opisHtml: node.attributes.field_sektor_opis?.processed || "",
-      zastWstepHtml: node.attributes.field_sektor_zast_wstep?.processed || "",
+      podtytul: node.attributes.field_sys_podtytul || "",
+      lead: node.attributes.field_sys_lead || "",
+      opisHtml: node.attributes.field_sys_opis?.processed || "",
       zdjecie,
+      wideo,
       galeria,
       dokumenty,
-      zastosowania,
+      funkcje,
+      parametry,
       alias: node.attributes.path?.alias || alias,
     };
   } catch {
@@ -104,10 +142,9 @@ async function getSektor(slug: string): Promise<SektorData | null> {
   }
 }
 
-// --- Lista slugów do pre-renderowania (SEO + wydajność) ---
 export async function generateStaticParams() {
   try {
-    const res = await fetch(`${DRUPAL}/jsonapi/node/sektor`, {
+    const res = await fetch(`${DRUPAL}/jsonapi/node/system`, {
       next: { revalidate: 0 },
     });
     if (!res.ok) return [];
@@ -115,81 +152,97 @@ export async function generateStaticParams() {
     return (json.data || [])
       .map((n: any) => n.attributes.path?.alias)
       .filter(Boolean)
-      .map((alias: string) => ({ slug: alias.replace("/sektory/", "") }));
+      .map((alias: string) => ({ slug: alias.replace("/systemy/", "") }));
   } catch {
     return [];
   }
 }
 
-// --- SEO: title + description z Drupala ---
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const sektor = await getSektor(slug);
-  if (!sektor) return { title: "Sektor — ATUT" };
+  const system = await getSystem(slug);
+  if (!system) return { title: "System — ATUT" };
 
   return {
-    title: `${sektor.title} — ATUT`,
-    description: sektor.lead.slice(0, 160),
+    title: `${system.title} — ATUT`,
+    description: system.lead.slice(0, 160),
     openGraph: {
-      title: sektor.title,
-      description: sektor.lead.slice(0, 160),
-      images: sektor.zdjecie ? [sektor.zdjecie.url] : [],
+      title: system.title,
+      description: system.lead.slice(0, 160),
+      images: system.zdjecie ? [system.zdjecie.url] : [],
     },
-    alternates: { canonical: `https://atutnet.com${sektor.alias}` },
+    alternates: { canonical: `https://atutnet.com${system.alias}` },
   };
 }
 
-// --- Strona ---
-export default async function SektorPage({
+export default async function SystemPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const sektor = await getSektor(slug);
-  if (!sektor) notFound();
+  const system = await getSystem(slug);
+  if (!system) notFound();
+
+  const breadcrumbs = [
+    { label: "Strona główna", href: "/" },
+    { label: "Systemy", href: "/systemy" },
+    { label: system.title, href: null },
+  ];
+
+  // schema.org Product (JSON-LD)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: system.title,
+    description: system.lead,
+    ...(system.zdjecie ? { image: system.zdjecie.url } : {}),
+    brand: { "@type": "Brand", name: "ATUT" },
+  };
 
   return (
     <main className="bg-[var(--atut-paper)] min-h-screen">
-      {/* HERO — tytuł pełna szerokość, lead (4) + zdjęcie (8) od wspólnej górnej linii */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* HERO */}
       <section className="pt-32 pb-16 md:pb-24 px-6 max-w-6xl mx-auto">
-        <div className="mb-8">
-          <BackButton />
-        </div>
+        <Breadcrumbs crumbs={breadcrumbs} />
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
-          {sektor.podtytul}
+          {system.podtytul}
         </span>
         <h1 className="heading-display text-3xl md:text-5xl lg:text-6xl uppercase text-[var(--atut-navy)] mt-4 leading-[0.95]">
-          {sektor.title}
+          {system.title}
         </h1>
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           <div className="lg:col-span-4">
-            {sektor.lead && (
+            {system.lead && (
               <p className="text-lg text-gray-700 leading-relaxed">
-                {sektor.lead}
+                {system.lead}
               </p>
             )}
             <div className="w-16 h-[3px] bg-[var(--atut-red)] mt-8" />
           </div>
-          {sektor.zdjecie && (
+          {(system.zdjecie || system.wideo) && (
             <figure className="lg:col-span-8">
-              <img
-                src={sektor.zdjecie.url}
-                alt={sektor.zdjecie.alt}
-                className="w-full h-auto border border-gray-200"
-                loading="eager"
+              <HeroMedia
+                image={system.zdjecie?.url || null}
+                imageAlt={system.zdjecie?.alt || system.title}
+                video={system.wideo}
               />
             </figure>
           )}
         </div>
       </section>
 
-      {/* OPIS — linia podziału, label w lewej szynie, proza w prawej (8) */}
-      {sektor.opisHtml && (
+      {/* OPIS */}
+      {system.opisHtml && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             <div className="lg:col-span-4">
@@ -199,38 +252,30 @@ export default async function SektorPage({
             </div>
             <div
               className="sektor-opis lg:col-span-8 text-gray-800 leading-relaxed space-y-4"
-              dangerouslySetInnerHTML={{ __html: sektor.opisHtml }}
+              dangerouslySetInnerHTML={{ __html: system.opisHtml }}
             />
           </div>
         </section>
       )}
 
-      {/* ZASTOSOWANIA — nagłówek w lewej szynie, wstęp w prawej, kafelki pełna szerokość */}
-      {sektor.zastosowania.length > 0 && (
+      {/* FUNKCJE — kafelki */}
+      {system.funkcje.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             <header className="lg:col-span-4">
               <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
-                // Zastosowanie
+                // Funkcje
               </span>
               <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-navy)] mt-2 leading-tight">
-                Gdzie pracuje system
+                Co potrafi system
               </h2>
             </header>
-            {sektor.zastWstepHtml && (
-              <div
-                className="sektor-opis lg:col-span-8 text-gray-700 text-base leading-relaxed space-y-4"
-                dangerouslySetInnerHTML={{ __html: sektor.zastWstepHtml }}
-              />
-            )}
           </div>
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 border-t border-l border-gray-200">
-            {sektor.zastosowania.map((z, i) => (
+  {system.funkcje.map((f, i) => (
               <article
                 key={i}
-                className={`relative overflow-hidden p-6 md:p-8 border-r border-b border-gray-200 ${
-                  z.wyroznienie ? "bg-gray-200" : "bg-[var(--atut-paper)]"
-                }`}
+                className="relative overflow-hidden p-6 md:p-8 bg-[var(--atut-paper)] border-r border-b border-gray-200"
               >
                 <span
                   aria-hidden="true"
@@ -243,19 +288,19 @@ export default async function SektorPage({
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <h3 className="font-bold text-lg text-[var(--atut-navy)] leading-tight">
-                    {z.tytul}
+                    {f.tytul}
                   </h3>
                 </div>
-                {z.opisHtml && (
+                {f.opisHtml && (
                   <div
                     className="text-gray-700 text-sm leading-relaxed mb-3"
-                    dangerouslySetInnerHTML={{ __html: z.opisHtml }}
+                    dangerouslySetInnerHTML={{ __html: f.opisHtml }}
                   />
                 )}
-                {z.punktyHtml && (
+                {f.punktyHtml && (
                   <div
                     className="sektor-zast text-gray-700 text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: z.punktyHtml }}
+                    dangerouslySetInnerHTML={{ __html: f.punktyHtml }}
                   />
                 )}
               </article>
@@ -264,8 +309,41 @@ export default async function SektorPage({
         </section>
       )}
 
-      {/* DOKUMENTY — ciemna sekcja, nagłówek w lewej szynie, lista w prawej (8) */}
-      {sektor.dokumenty.length > 0 && (
+      {/* PARAMETRY — tabliczka mono */}
+      {system.parametry.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
+          <div className="border-t border-gray-300 pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <header className="lg:col-span-4">
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
+                // Parametry
+              </span>
+              <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-navy)] mt-2 leading-tight">
+                Dane techniczne
+              </h2>
+            </header>
+            <div className="lg:col-span-8">
+              <dl className="border-t border-gray-300">
+                {system.parametry.map((p, i) => (
+                  <div
+                    key={i}
+                    className="grid grid-cols-2 gap-4 border-b border-gray-300 py-3"
+                  >
+                    <dt className="font-mono text-xs uppercase tracking-wider text-[var(--atut-mono)]">
+                      {p.nazwa}
+                    </dt>
+                    <dd className="font-mono text-sm text-[var(--atut-navy)] font-bold">
+                      {p.wartosc}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* DOKUMENTY — ciemna sekcja */}
+      {system.dokumenty.length > 0 && (
         <section className="bg-[var(--atut-navy)] mb-16 md:mb-24">
           <div className="max-w-6xl mx-auto px-6 py-16 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             <header className="lg:col-span-4">
@@ -277,7 +355,7 @@ export default async function SektorPage({
               </h2>
             </header>
             <ul className="lg:col-span-8 border border-[var(--atut-paper)]/20 divide-y divide-[var(--atut-paper)]/20 self-start">
-              {sektor.dokumenty.map((doc, i) => (
+              {system.dokumenty.map((doc, i) => (
                 <li key={i}>
                   <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 md:p-5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--atut-red)]">
                     <span
@@ -307,19 +385,19 @@ export default async function SektorPage({
         </section>
       )}
 
-      {/* GALERIA — nagłówek nad siatką, siatka pełna szerokość */}
-      {sektor.galeria.length > 0 && (
+      {/* GALERIA */}
+      {system.galeria.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
           <div className="border-t border-gray-300 pt-10 mb-10">
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--atut-red-text)]">
               // Galeria
             </span>
             <h2 className="heading-display text-2xl md:text-3xl uppercase text-[var(--atut-navy)] mt-2 leading-tight">
-              Realizacja
+              Zdjęcia
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {sektor.galeria.map((img, i) => (
+            {system.galeria.map((img, i) => (
               <figure key={i} className="border border-gray-200">
                 <img
                   src={img.url}
@@ -333,7 +411,7 @@ export default async function SektorPage({
         </section>
       )}
 
-      {/* POWRÓT — na dole strony */}
+      {/* POWRÓT */}
       <section className="max-w-6xl mx-auto px-6 pb-16 md:pb-24">
         <div className="border-t border-gray-300 pt-12">
           <BackButton />
