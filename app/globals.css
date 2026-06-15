@@ -99,3 +99,24 @@ h1, h2, h3, h4 {
   font-weight: 700;
 }
 .sektor-zast strong { font-weight: 700; color: var(--atut-navy); }
+/* --- Animacja wysuwania Headera (łagodna, zwalnia na końcu) --- */
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-down {
+    animation: none;
+  }
+}

@@ -1,6 +1,7 @@
 import { Inter, JetBrains_Mono, Archivo_Black } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
+import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/ui/ScrollToTop";
 
 const archivoBlack = Archivo_Black({
@@ -35,45 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${archivoBlack.variable} ${inter.variable} ${jetbrainsMono.variable} h-full`}
     >
       <body className="h-full bg-[var(--atut-paper)] text-[var(--atut-text)] relative">
+        <Header />
         {children}
+        <Footer />
         <ScrollToTop />
-
-        {/* Bezpieczny strażnik interfejsu Next.js (czyści dev-overlay) */}
-        <Script id="watermark-cleaner" strategy="afterInteractive">
-          {`
-            (function() {
-              function cleanNextElements() {
-                var selectors = [
-                  '.__next-toast-container',
-                  '#--next-badge-root',
-                  '[data-nextjs-toast-wrapper]',
-                  '#nextjs-dev-overlay',
-                  'nextjs-portal'
-                ];
-                selectors.forEach(function(s) {
-                  var el = document.querySelector(s);
-                  if (el) el.remove();
-                });
-
-                var allDivs = document.querySelectorAll('body > div, body > nextjs-portal');
-                allDivs.forEach(function(el) {
-                  var style = window.getComputedStyle(el);
-                  if (style.position === 'fixed' && style.bottom === '0px' && style.left === '0px') {
-                    if (el.innerHTML.toLowerCase().includes('next') || el.innerHTML.toLowerCase().includes('vercel')) {
-                      el.remove();
-                    }
-                  }
-                });
-              }
-
-              cleanNextElements();
-              window.addEventListener('load', cleanNextElements);
-              setTimeout(cleanNextElements, 500);
-              setTimeout(cleanNextElements, 1500);
-              setTimeout(cleanNextElements, 3500);
-            })();
-          `}
-        </Script>
       </body>
     </html>
   );
